@@ -22,10 +22,10 @@ def fPC (y, yhat):
 def measureAccuracyOfPredictors (predictors, X, y):
     # initialize the yhat array with the same shape as y
     yhat = np.zeros_like(y)
-    for i, p in enumerate(predictors):
+    for p in predictors:
         # collect yhat prediction using each predictor
         r1,c1,r2,c2 = p
-        for j in range(len(X)):
+        for j in range(len(y)):
             # add the sum of each predictor for each j images
             yhat[j] += 1 if X[j,r1,c1] > X[j,r2,c2] else 0
     # if the majority of the predictors indicate that the image is smiling then put guess as 1, 0 otherwise
@@ -73,7 +73,7 @@ def findPredictors (Faces, Labels):
     final_phi = set()
     prev_guess = np.zeros_like(Labels)
     for i in range(6):
-        print('# #', end=' ', flush=True)
+        print('# # #', end=' ', flush=True)
         # initialize best fPC, best predictor tuple, and best guess in the current round
         max_fPC = 0
         max_phi = (0,0,0,0)
@@ -123,7 +123,7 @@ def printResults(trainingFaces, trainingLabels, testingFaces, testingLabels):
         print(f"        accuracy: {accuracy}")
         print(f"        predictors:{predictors}")
         test_accuracy = measureAccuracyOfPredictors(predictors, testingFaces, testingLabels)
-        print(f"testing set n = 2000:")
+        print(f"testing  set n = 2000:")
         print(f"        accuracy: {test_accuracy}")
         print("")
         print("------------------------------")
@@ -151,7 +151,8 @@ if __name__ == "__main__":
     testingFaces, testingLabels = loadData("test")
     trainingFaces, trainingLabels = loadData("train")
     s = time.time()
+    # printResults(trainingFaces, trainingLabels, testingFaces, testingLabels)
     printResults(trainingFaces, trainingLabels, testingFaces, testingLabels)
     e = time.time()
-    print(f"{e-s}sec")
+    print(f"total time: {e-s}sec")
 
