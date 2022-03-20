@@ -73,7 +73,6 @@ def findPredictors (Faces, Labels):
     final_phi = set()
     prev_guess = np.zeros_like(Labels)
     for i in range(6):
-        print('# # #', end=' ', flush=True)
         # initialize best fPC, best predictor tuple, and best guess in the current round
         max_fPC = 0
         max_phi = (0,0,0,0)
@@ -103,6 +102,7 @@ def findPredictors (Faces, Labels):
 
         prev_guess = prev_guess + max_diff
         final_phi.add(max_phi)
+        print('# # #', end=' ', flush=True)
 
     print("")
     return max_fPC, final_phi
