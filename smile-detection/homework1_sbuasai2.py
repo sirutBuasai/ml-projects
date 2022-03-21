@@ -20,8 +20,6 @@ def problem5 (A):
     return np.ones((A.shape[1],1))
 
 def problem6 (A):
-    # are we assuming that A is a squared matrix?
-    # if not, are we assumping that the diagonal 0s wrap around
     B = np.copy(A)
     np.fill_diagonal(B, 0)
     return B
@@ -41,6 +39,8 @@ def problem10 (A, c, d):
     return np.mean(S)
 
 def problem11 (A, k):
+    # Scipy library does have a function that produces the eigenvectors based on k largest eigenvalues
+    # I decided to use this function because it would be more efficient given large nxn matrix and small k value.
     return sp.linalg.eigh(A,subset_by_index=[A.shape[0]-k, A.shape[0]-1])[1]
 
 def problem12 (A, x):
