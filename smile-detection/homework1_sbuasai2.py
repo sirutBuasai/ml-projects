@@ -40,7 +40,8 @@ def problem10 (A, c, d):
 
 def problem11 (A, k):
     # Scipy library does have a function that produces the eigenvectors based on k largest eigenvalues
-    # I decided to use this function because it would be more efficient given large nxn matrix and small k value.
+    # I decided to use this function instead of sort() and slicing to find max k eigen values
+    # because it would be more efficient given large nxn matrix and small k value.
     return sp.linalg.eigh(A,subset_by_index=[A.shape[0]-k, A.shape[0]-1])[1]
 
 def problem12 (A, x):
