@@ -80,6 +80,7 @@ def findPredictors (Faces, Labels):
         # choose r1,c1 as a base partial feature
         for r1,c1 in np.ndindex(Faces[0].shape):
             # for each pixel (r1,c1) find the diff over ALL the images
+            # if the pixel (r1,c1) is higher than the target then the diff value to 1, 0 otherwise
             diff = np.where(Faces - np.reshape(Faces[:,r1,c1],(Faces.shape[0],1,1)) < 0, 1, 0)
             # choose the second pixel (r2,c2) that has been compared with (r1,c1)
             for r2,c2 in np.ndindex(diff[0].shape):
