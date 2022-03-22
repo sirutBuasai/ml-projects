@@ -69,7 +69,7 @@ def stepwiseRegression (trainingFaces, trainingLabels):
 # Return: the fPC and the set of predictors
 #
 def findPredictors (Faces, Labels):
-    # initialize the final sets of predictors and the preditions from previous set or preditors
+    # initialize the final sets of predictors and the predictions from previous set or predictors
     final_phi = set()
     prev_guess = np.zeros_like(Labels)
     for i in range(6):
@@ -79,7 +79,7 @@ def findPredictors (Faces, Labels):
         max_diff = np.zeros_like(Labels)
         # choose r1,c1 as a base partial feature
         for r1,c1 in np.ndindex(Faces[0].shape):
-            # for each pixel (r1,c1) fidn the diff over ALL the images
+            # for each pixel (r1,c1) find the diff over ALL the images
             diff = np.zeros_like(Faces)
             for j, face in enumerate(Faces):
                 # if the pixel (r1,c1) is higher than the target then change the diff value to 1, 0 otherwise
@@ -151,7 +151,6 @@ if __name__ == "__main__":
     testingFaces, testingLabels = loadData("test")
     trainingFaces, trainingLabels = loadData("train")
     s = time.time()
-    # printResults(trainingFaces, trainingLabels, testingFaces, testingLabels)
     printResults(trainingFaces, trainingLabels, testingFaces, testingLabels)
     e = time.time()
     print(f"total time: {e-s}sec")
