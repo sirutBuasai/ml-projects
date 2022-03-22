@@ -129,3 +129,4 @@ class hw1_test(unittest.TestCase):
     e3 = np.array([[1,0],[3,2]])
     actual = problem14(A)
     self.assertTrue(np.array_equal(actual, e0) or np.array_equal(actual, e1) or np.array_equal(actual, e2) or np.array_equal(actual, e3))
+

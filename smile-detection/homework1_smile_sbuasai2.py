@@ -40,10 +40,10 @@ def measureAccuracyOfPredictors (predictors, X, y):
 # Argument: 3D np.array() of training faces, 1D np.array() of training labels, 3D np.array() of testing faces, 1D np.array() of testing labels
 # Return: fPC from the set of tuples of predictors, the set of tuples of predictor
 #
-def stepwiseRegression (trainingFaces, trainingLabels):
+def stepwiseRegression (trainingFaces, trainingLabels, show=False):
     fPC, predictors = findPredictors(trainingFaces, trainingLabels)
 
-    if len(trainingLabels) == 2000:
+    if show:
         # Show an arbitrary test image in gray scale
         im = trainingFaces[np.random.randint(0,2000),:,:]
         fig, ax = plt.subplots(1)
@@ -80,10 +80,7 @@ def findPredictors (Faces, Labels):
         # choose r1,c1 as a base partial feature
         for r1,c1 in np.ndindex(Faces[0].shape):
             # for each pixel (r1,c1) find the diff over ALL the images
-            diff = np.zeros_like(Faces)
-            for j, face in enumerate(Faces):
-                # if the pixel (r1,c1) is higher than the target then change the diff value to 1, 0 otherwise
-                diff[j] = np.where((face - face[r1,c1]) < 0, 1, 0)
+            diff = np.where(Faces - np.reshape(Faces[:,r1,c1],(Faces.shape[0],1,1)) < 0, 1, 0)
             # choose the second pixel (r2,c2) that has been compared with (r1,c1)
             for r2,c2 in np.ndindex(diff[0].shape):
                 curr_phi = (r1,c1,r2,c2)
