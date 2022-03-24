@@ -1,5 +1,5 @@
-import re
 import numpy as np
+from matplotlib import pyplot as plt
 
 ########################################################################################################################
 # PROBLEM 2
@@ -57,13 +57,21 @@ def gradientDescent (Xtilde, y, alpha = 0.):
     EPSILON = 3e-3  # Step size aka learning rate
     T = 5000  # Number of gradient descent iterations
     # initialize wtilde
-    wtilde = np.random.rand(Xtilde.shape[1])
+    wtilde = 0.01 * np.random.rand(Xtilde.shape[1])
     # iterate {T} times for gradient descent
     for i in range(T):
         # formula: w(1) = w(0) - epsilon * gradfMSE(w(0))
         wtilde -= EPSILON*gradfMSE(wtilde, Xtilde, y, alpha)
 
     return wtilde
+
+# Visualization helper
+def vizWeights(weight):
+    # construct 48x48 image from flatten image
+    img = weight[:-1].reshape((48,48))
+    # visualize the image
+    plt.imshow(img, cmap='gray')
+    plt.show()
 
 if __name__ == "__main__":
     # Load data
@@ -78,3 +86,7 @@ if __name__ == "__main__":
     # Report fMSE cost using each of the three learned weight vectors
     print(fMSE(w1, Xtilde_tr, ytr))
     print(fMSE(w2, Xtilde_tr, ytr))
+    print(fMSE(w1, Xtilde_te, yte))
+    print(fMSE(w2, Xtilde_te, yte))
+    vizWeights(w1)
+    vizWeights(w2)
