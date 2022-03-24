@@ -44,7 +44,9 @@ def method1 (Xtilde, y):
 
 # Given a design matrix Xtilde and labels y, train a linear regressor for Xtilde and y using gradient descent on fMSE.
 def method2 (Xtilde, y):
-    return gradientDescent(Xtilde, y)
+    # use gradient descent to get wtilde
+    wtilde = gradientDescent(Xtilde, y)
+    return wtilde
 
 # Given a design matrix Xtilde and labels y, train a linear regressor for Xtilde and y using gradient descent on fMSE
 # with regularization.
@@ -62,7 +64,6 @@ def gradientDescent (Xtilde, y, alpha = 0.):
     for i in range(T):
         # formula: w(1) = w(0) - epsilon * gradfMSE(w(0))
         wtilde -= EPSILON*gradfMSE(wtilde, Xtilde, y, alpha)
-
     return wtilde
 
 # Visualization helper
