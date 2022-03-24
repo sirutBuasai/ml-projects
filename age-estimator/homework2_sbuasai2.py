@@ -16,30 +16,29 @@ def trainPolynomialRegressor (x, y, d):
 # Given an array of faces (N x M x M, where N is number of examples and M is number of pixes along each axis),
 # return a design matrix Xtilde ((M**2 + 1) x N) whose last row contains all 1s.
 def reshapeAndAppend1s (faces):
-    # flatten the image
+    # flatten the image into shape (N x (M**2 + 1))
     flatten_faces = np.reshape(faces, (faces.shape[0], faces.shape[1]*faces.shape[2]))
     # append 1s to each row
     faces_tilde = np.column_stack((flatten_faces, np.ones(flatten_faces.shape[0])))
-    return faces_tilde
+    return faces_tilde.T
 
 # Given a vector of weights w, a design matrix Xtilde, and a vector of labels y, return the (unregularized)
 # MSE.
 def fMSE (wtilde, Xtilde, y):
-    # the formula is X.T.dot(w). however, the given Xtilde is already in ((M**2 + 1) x N) shape
-    yhat = Xtilde.dot(wtilde)
+    # formula: yhat = X.T.dot(w)
+    yhat = Xtilde.T.dot(wtilde)
     return np.mean((y-yhat)**2)
 
 # Given a vector of weights w, a design matrix Xtilde, and a vector of labels y, and a regularization strength
 # alpha (default value of 0), return the gradient of the (regularized) MSE loss.
 def gradfMSE (wtilde, Xtilde, y, alpha = 0.):
-    # the formula is X.dot(X.T.dot(w)). however, the given Xtilde is already in ((M**2 + 1) x N) shape
-    return (1/len(y)) * Xtilde.T.dot(Xtilde.dot(wtilde) - y)
+    # formula: gradfMSE = (1/n) * X.dot(X.T.dot(w) - y)
+    return (1/len(y)) * Xtilde.dot(Xtilde.T.dot(wtilde) - y)
 
 # Given a design matrix Xtilde and labels y, train a linear regressor for Xtilde and y using the analytical solution.
 def method1 (Xtilde, y):
-    # the formula is w = solve(X.dot(X.T), X.dot(y)). however, the given Xtilde is already in ((M**2 + 1) x N) shape
-    # thus, varialbe X in the formula = X.T and vice versa
-    wtilde = np.linalg.solve(Xtilde.T.dot(Xtilde), Xtilde.T.dot(y))
+    # formula: w = solve(X.dot(X.T), X.dot(y))
+    wtilde = np.linalg.solve(Xtilde.dot(Xtilde.T), Xtilde.dot(y))
     return wtilde
 
 # Given a design matrix Xtilde and labels y, train a linear regressor for Xtilde and y using gradient descent on fMSE.
@@ -59,7 +58,7 @@ def gradientDescent (Xtilde, y, alpha = 0.):
     EPSILON = 3e-3  # Step size aka learning rate
     T = 5000  # Number of gradient descent iterations
     # initialize wtilde
-    wtilde = 0.01 * np.random.rand(Xtilde.shape[1])
+    wtilde = 0.01 * np.random.rand(Xtilde.shape[0])
     # iterate {T} times for gradient descent
     for i in range(T):
         # formula: w(1) = w(0) - epsilon * gradfMSE(w(0))
@@ -85,9 +84,11 @@ if __name__ == "__main__":
     w2 = method2(Xtilde_tr, ytr)
     w3 = method3(Xtilde_tr, ytr)
     # Report fMSE cost using each of the three learned weight vectors
-    print(f"fMSE of training set with w1: {fMSE(w1, Xtilde_tr, ytr)}")
-    print(f"fMSE of training set with w2: {fMSE(w2, Xtilde_tr, ytr)}")
-    print(f"fMSE of testing  set with w1: {fMSE(w1, Xtilde_te, yte)}")
-    print(f"fMSE of testing  set with w2: {fMSE(w2, Xtilde_te, yte)}")
+    print(f"fMSE of training set:")
+    print(f"                      w1: {fMSE(w1, Xtilde_tr, ytr)}")
+    print(f"                      w2: {fMSE(w2, Xtilde_tr, ytr)}")
+    print(f"fMSE of testing  set:")
+    print(f"                      w1: {fMSE(w1, Xtilde_te, yte)}")
+    print(f"                      w2: {fMSE(w2, Xtilde_te, yte)}")
     vizWeights(w1)
     vizWeights(w2)
