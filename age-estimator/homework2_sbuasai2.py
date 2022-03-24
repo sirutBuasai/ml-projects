@@ -18,28 +18,33 @@ def trainPolynomialRegressor (x, y, d):
 def reshapeAndAppend1s (faces):
     # flatten the image
     flatten_faces = np.reshape(faces, (faces.shape[0], faces.shape[1]*faces.shape[2]))
+    # append 1s to each row
     faces_tilde = np.column_stack((flatten_faces, np.ones(flatten_faces.shape[0])))
     return faces_tilde
 
 # Given a vector of weights w, a design matrix Xtilde, and a vector of labels y, return the (unregularized)
 # MSE.
 def fMSE (wtilde, Xtilde, y):
+    # the formula is X.T.dot(w). however, the given Xtilde is already in ((M**2 + 1) x N) shape
     yhat = Xtilde.dot(wtilde)
     return np.mean((y-yhat)**2)
 
 # Given a vector of weights w, a design matrix Xtilde, and a vector of labels y, and a regularization strength
 # alpha (default value of 0), return the gradient of the (regularized) MSE loss.
 def gradfMSE (wtilde, Xtilde, y, alpha = 0.):
-    return np.mean(Xtilde.T.dot(Xtilde.dot(wtilde) - y))
+    # the formula is X.dot(X.T.dot(w)). however, the given Xtilde is already in ((M**2 + 1) x N) shape
+    return (1/len(y)) * Xtilde.T.dot(Xtilde.dot(wtilde) - y)
 
 # Given a design matrix Xtilde and labels y, train a linear regressor for Xtilde and y using the analytical solution.
 def method1 (Xtilde, y):
+    # the formula is w = solve(X.dot(X.T), X.dot(y)). however, the given Xtilde is already in ((M**2 + 1) x N) shape
+    # thus, varialbe X in the formula = X.T and vice versa
     wtilde = np.linalg.solve(Xtilde.T.dot(Xtilde), Xtilde.T.dot(y))
     return wtilde
 
 # Given a design matrix Xtilde and labels y, train a linear regressor for Xtilde and y using gradient descent on fMSE.
 def method2 (Xtilde, y):
-    pass
+    return gradientDescent(Xtilde, y)
 
 # Given a design matrix Xtilde and labels y, train a linear regressor for Xtilde and y using gradient descent on fMSE
 # with regularization.
@@ -51,6 +56,14 @@ def method3 (Xtilde, y):
 def gradientDescent (Xtilde, y, alpha = 0.):
     EPSILON = 3e-3  # Step size aka learning rate
     T = 5000  # Number of gradient descent iterations
+    # initialize wtilde
+    wtilde = np.random.rand(Xtilde.shape[1])
+    # iterate {T} times for gradient descent
+    for i in range(T):
+        # formula: w(1) = w(0) - epsilon * gradfMSE(w(0))
+        wtilde -= EPSILON*gradfMSE(wtilde, Xtilde, y, alpha)
+
+    return wtilde
 
 if __name__ == "__main__":
     # Load data
@@ -64,3 +77,4 @@ if __name__ == "__main__":
     w3 = method3(Xtilde_tr, ytr)
     # Report fMSE cost using each of the three learned weight vectors
     print(fMSE(w1, Xtilde_tr, ytr))
+    print(fMSE(w2, Xtilde_tr, ytr))
