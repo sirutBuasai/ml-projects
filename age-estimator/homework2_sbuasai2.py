@@ -84,9 +84,9 @@ if __name__ == "__main__":
     w2 = method2(Xtilde_tr, ytr)
     w3 = method3(Xtilde_tr, ytr)
     # Report fMSE cost using each of the three learned weight vectors
-    print(fMSE(w1, Xtilde_tr, ytr))
-    print(fMSE(w2, Xtilde_tr, ytr))
-    print(fMSE(w1, Xtilde_te, yte))
-    print(fMSE(w2, Xtilde_te, yte))
+    print(f"fMSE of training set with w1: {fMSE(w1, Xtilde_tr, ytr)}")
+    print(f"fMSE of training set with w2: {fMSE(w2, Xtilde_tr, ytr)}")
+    print(f"fMSE of testing  set with w1: {fMSE(w1, Xtilde_te, yte)}")
+    print(f"fMSE of testing  set with w2: {fMSE(w2, Xtilde_te, yte)}")
     vizWeights(w1)
     vizWeights(w2)
