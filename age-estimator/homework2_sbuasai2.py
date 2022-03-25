@@ -7,7 +7,14 @@ from matplotlib import pyplot as plt
 # Given a vector x of (scalar) inputs and associated vector y of the target labels, and given
 # degree d of the polynomial, train a polynomial regression model and return the optimal weight vector.
 def trainPolynomialRegressor (x, y, d):
-    pass
+    # initialize X vector
+    X = np.ones(x.shape)
+    # populate X with x_0, x_1, ... ,x_d
+    for i in range(1, d+1):
+        X = np.vstack((X, x**i))
+    # formula: w = solve(X.dot(X.T), X.dot(y))
+    w = np.linalg.solve(X.dot(X.T), X.dot(y))
+    return X, w
 
 ########################################################################################################################
 # PROBLEM 1
@@ -83,6 +90,7 @@ if __name__ == "__main__":
     w1 = method1(Xtilde_tr, ytr)
     w2 = method2(Xtilde_tr, ytr)
     w3 = method3(Xtilde_tr, ytr)
+
     # Report fMSE cost using each of the three learned weight vectors
     print(f"fMSE of training set:")
     print(f"                      w1: {fMSE(w1, Xtilde_tr, ytr)}")

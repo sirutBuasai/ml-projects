@@ -1,11 +1,11 @@
 #!usr/bin/env python3
 import numpy as np
 
-a = np.array([[[1,1],[1,1]],[[2,2],[2,2]],[[3,3],[3,3]],[[4,4],[4,4]]])
-b = np.reshape(a, (a.shape[1]*a.shape[2], a.shape[0]))
-one = np.ones(b.shape[1])
-c = np.vstack((b, one))
+a = np.array([1,2,3])
+b = np.atleast_2d(a)
+x = np.array([np.ones(a.shape)])
+for i in range(1,4):
+    x = np.vstack((x,a**i))
+print(x)
 print(a)
 print(b)
-print(one)
-print(c)
