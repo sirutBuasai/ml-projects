@@ -40,7 +40,7 @@ def fMSE (wtilde, Xtilde, y):
 # alpha (default value of 0), return the gradient of the (regularized) MSE loss.
 def gradfMSE (wtilde, Xtilde, y, alpha = 0.):
     # formula: gradfMSE = (1/n) * X.dot(X.T.dot(w) - y)
-    return (1/len(y)) * Xtilde.dot(Xtilde.T.dot(wtilde) - y)
+    return (1/len(y)) * (Xtilde.dot(Xtilde.T.dot(wtilde) - y) + (alpha * wtilde))
 
 # Given a design matrix Xtilde and labels y, train a linear regressor for Xtilde and y using the analytical solution.
 def method1 (Xtilde, y):
@@ -58,7 +58,8 @@ def method2 (Xtilde, y):
 # with regularization.
 def method3 (Xtilde, y):
     ALPHA = 0.1
-    pass
+    wtilde = gradientDescent(Xtilde, y, ALPHA)
+    return wtilde
 
 # Helper method for method2 and method3.
 def gradientDescent (Xtilde, y, alpha = 0.):
@@ -95,8 +96,11 @@ if __name__ == "__main__":
     print(f"fMSE of training set:")
     print(f"                      w1: {fMSE(w1, Xtilde_tr, ytr)}")
     print(f"                      w2: {fMSE(w2, Xtilde_tr, ytr)}")
+    print(f"                      w3: {fMSE(w3, Xtilde_tr, ytr)}")
     print(f"fMSE of testing  set:")
     print(f"                      w1: {fMSE(w1, Xtilde_te, yte)}")
     print(f"                      w2: {fMSE(w2, Xtilde_te, yte)}")
+    print(f"                      w3: {fMSE(w3, Xtilde_te, yte)}")
     vizWeights(w1)
     vizWeights(w2)
+    vizWeights(w3)
