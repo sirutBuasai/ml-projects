@@ -14,7 +14,7 @@ def trainPolynomialRegressor (x, y, d):
         X = np.vstack((X, x**i))
     # formula: w = solve(X.dot(X.T), X.dot(y))
     w = np.linalg.solve(X.dot(X.T), X.dot(y))
-    return X, w
+    return w
 
 ########################################################################################################################
 # PROBLEM 1
