@@ -13,7 +13,7 @@ def trainPolynomialRegressor (x, y, d):
 # PROBLEM 1
 ########################################################################################################################
 
-# Given an array of faces (N x M x M, where N is number of examples and M is number of pixes along each axis),
+# Given an array of faces (N x M x M, where N is number of examples and M is number of pixel along each axis),
 # return a design matrix Xtilde ((M**2 + 1) x N) whose last row contains all 1s.
 def reshapeAndAppend1s (faces):
     # flatten the image into shape (N x (M**2 + 1))
