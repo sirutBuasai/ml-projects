@@ -68,7 +68,7 @@ def gradientDescent (Xtilde, y, alpha = 0.):
     # initialize wtilde
     wtilde = 0.01 * np.random.rand(Xtilde.shape[0])
     # iterate {T} times for gradient descent
-    for i in range(T):
+    for _ in range(T):
         # formula: w(1) = w(0) - epsilon * gradfMSE(w(0))
         wtilde -= EPSILON*gradfMSE(wtilde, Xtilde, y, alpha)
     return wtilde
