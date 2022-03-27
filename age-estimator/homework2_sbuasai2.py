@@ -7,9 +7,9 @@ from matplotlib import pyplot as plt
 # Given a vector x of (scalar) inputs and associated vector y of the target labels, and given
 # degree d of the polynomial, train a polynomial regression model and return the optimal weight vector.
 def trainPolynomialRegressor (x, y, d):
-    # initialize X vector
+    # initialize X vector with x_0 being 1
     X = np.ones(x.shape)
-    # populate X with x_0, x_1, ... ,x_d
+    # populate X with x_1, ... ,x_d
     for i in range(1, d+1):
         X = np.vstack((X, x**i))
     # formula: w = solve(X.dot(X.T), X.dot(y))
