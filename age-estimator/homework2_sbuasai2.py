@@ -81,6 +81,16 @@ def vizWeights(weight):
     plt.imshow(img, cmap='gray')
     plt.show()
 
+# Egregious guesses helper
+def showEgregious(Xtilde, wtilde, y):
+    # formula: yhat = X.T.dot(w)
+    yhat = Xtilde.T.dot(wtilde)
+    # get the difference between y and yhat
+    diff = np.abs(y - yhat)
+    # get the top 5 values between y and yhat
+    diff_idx = np.argpartition(diff, -5)[-5:]
+    return diff_idx, y[diff_idx], yhat[diff_idx]
+
 if __name__ == "__main__":
     # Load data
     Xtilde_tr = reshapeAndAppend1s(np.load("age_regression_Xtr.npy"))
@@ -104,3 +114,8 @@ if __name__ == "__main__":
     vizWeights(w1)
     vizWeights(w2)
     vizWeights(w3)
+    idx_arr, y3, yhat3 = showEgregious(Xtilde_te, w3, yte)
+    print(f"Top 5 egregious ground truth {y3}")
+    print(f"Top 5 egregious gueses {yhat3}")
+    for i in idx_arr:
+        vizWeights(Xtilde_te[:,i])
