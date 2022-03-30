@@ -41,7 +41,7 @@ def fMSE (wtilde, Xtilde, y):
 def gradfMSE (wtilde, Xtilde, y, alpha = 0.):
     # formula: gradfMSE = (1/n) * X.dot(X.T.dot(w) - y)
     w = np.copy(wtilde)
-    w[-1] = 1
+    w[-1] = 0.5
     return (1/len(y)) * (Xtilde.dot(Xtilde.T.dot(wtilde) - y) + (alpha * w))
 
 # Given a design matrix Xtilde and labels y, train a linear regressor for Xtilde and y using the analytical solution.
