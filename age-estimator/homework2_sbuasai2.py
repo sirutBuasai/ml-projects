@@ -40,7 +40,9 @@ def fMSE (wtilde, Xtilde, y):
 # alpha (default value of 0), return the gradient of the (regularized) MSE loss.
 def gradfMSE (wtilde, Xtilde, y, alpha = 0.):
     # formula: gradfMSE = (1/n) * X.dot(X.T.dot(w) - y)
-    return (1/len(y)) * (Xtilde.dot(Xtilde.T.dot(wtilde) - y) + (alpha * wtilde))
+    w = np.copy(wtilde)
+    w[-1] = 0
+    return (1/len(y)) * (Xtilde.dot(Xtilde.T.dot(wtilde) - y) + (alpha * w))
 
 # Given a design matrix Xtilde and labels y, train a linear regressor for Xtilde and y using the analytical solution.
 def method1 (Xtilde, y):
