@@ -6,17 +6,20 @@ import matplotlib.pyplot as plt
 # Then return Wtilde.
 def softmaxRegression(Xtilde, y, epsilon, batchSize, alpha):
     # initialize epoch
-    epoch = 2
+    epoch = 1
+    batchSize = 2
     # randomize weights
     Wtilde = 0.01 * np.random.rand(Xtilde.shape[0],y.shape[0])
     # Compute stochastic gradient descent
     for _ in range(0, epoch):
-        for i in range(0, (y.shape[1]//batchSize)):
+        # for i in range(0, (y.shape[1]//batchSize)):
+        for i in range(0, 1):
             # initiliaze the starting and ending idx of the current batch
             start_idx = i*batchSize
             end_idx = start_idx+batchSize
             # compute the gradient and update the weights based on the current batch
-            Wtilde -= epsilon*gradfCE(Xtilde[:,start_idx:end_idx], Wtilde, y, alpha)
+            gradient = gradfCE(Xtilde[:,start_idx:end_idx], Wtilde, y[:,start_idx:end_idx], alpha)
+            Wtilde -= epsilon*gradient
     return Wtilde
 
 # Given x data set of column vectors, yhat guesses, and y.
@@ -27,9 +30,8 @@ def gradfCE (Xtilde, Wtilde, y, alpha=0):
     w[-1] = 0.5
     # initialize yhat from activation function yhat = softmax(z)
     z = Xtilde.T.dot(Wtilde)
-    yhat = np.exp(z) / np.sum(z)
-    return (1/len(y)) * (Xtilde.dot((yhat - y)) + (alpha * w))
-
+    yhat = np.exp(z) / np.sum(np.exp(z), axis=1)[:,None]
+    return (1/len(y)) * (Xtilde.dot((yhat - y.T)) + (alpha * w))
 
 if __name__ == "__main__":
     # Load data
@@ -51,6 +53,6 @@ if __name__ == "__main__":
 
     # Train the model
     Wtilde = softmaxRegression(Xtilde_tr, Ytr, epsilon=0.1, batchSize=100, alpha=.1)
-    print(Wtilde)
+
     # Visualize the vectors
     # ...
