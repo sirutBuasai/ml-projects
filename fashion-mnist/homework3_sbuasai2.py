@@ -7,15 +7,15 @@ import matplotlib.pyplot as plt
 def softmaxRegression(Xtilde, y, epsilon, batchSize, alpha):
     # initialize epoch and randomize weights
     epoch = 10
-    Wtilde = 0.01 * np.random.rand(Xtilde.shape[0],y.shape[0])
+    Wtilde = 1e-5 * np.random.rand(Xtilde.shape[0],y.shape[1])
     # Compute stochastic gradient descent
     for _ in range(0, epoch):
-        for i in range(0, (y.shape[1]//batchSize)):
+        for i in range(0, (y.shape[0]//batchSize)):
             # initiliaze the starting and ending idx of the current batch
             start_idx = i*batchSize
             end_idx = start_idx+batchSize
             # compute the gradient and update the weights based on the current batch
-            Wtilde -= epsilon*gradfCE(Xtilde[:,start_idx:end_idx], Wtilde, y[:,start_idx:end_idx], alpha)
+            Wtilde -= epsilon*gradfCE(Xtilde[:,start_idx:end_idx], Wtilde, y[start_idx:end_idx,:], alpha)
     return Wtilde
 
 # Given x data set of column vectors, yhat guesses, and y.
@@ -27,7 +27,7 @@ def gradfCE (Xtilde, Wtilde, y, alpha=0):
     # initialize yhat from activation function yhat = softmax(z)
     z = Xtilde.T.dot(Wtilde)
     yhat = np.exp(z) / np.sum(np.exp(z), axis=1)[:,None]
-    return (1/len(y)) * (Xtilde.dot((yhat - y.T)) + (alpha * w))
+    return (1/len(y)) * (Xtilde.dot((yhat - y)) + (alpha * w))
 
 # Visualization helper
 def vizWeights (weight):
@@ -56,13 +56,13 @@ if __name__ == "__main__":
 
     # Change from 0-9 labels to "one-hot" binary vector labels. For instance, 
     # if the label of some example is 3, then its y should be [ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 ]
-    Ytr = np.zeros((10, trainingLabels.shape[0]))
-    Ytr[trainingLabels, np.arange(trainingLabels.shape[0])] = 1
-    Yte = np.zeros((10, testingLabels.shape[0]))
-    Yte[testingLabels, np.arange(testingLabels.shape[0])] = 1
+    Ytr = np.zeros((10, trainingLabels.shape[0])).T
+    Ytr[np.arange(trainingLabels.shape[0]), trainingLabels] = 1
+    Yte = np.zeros((10, testingLabels.shape[0])).T
+    Yte[np.arange(testingLabels.shape[0]), testingLabels] = 1
 
     # Train the model
-    Wtilde = softmaxRegression(Xtilde_tr, Ytr, epsilon=0.1, batchSize=100, alpha=.1)
+    Wtilde = softmaxRegression(Xtilde_tr, Ytr, epsilon=0.1, batchSize=100, alpha=0.1)
     print(f"Training fPC: {fPC(Xtilde_tr, Wtilde, trainingLabels)}")
     print(f"Testing  fPC: {fPC(Xtilde_te, Wtilde, testingLabels)}")
 
