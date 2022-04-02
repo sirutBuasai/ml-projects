@@ -5,21 +5,17 @@ import matplotlib.pyplot as plt
 # conduct stochastic gradient descent (SGD) to optimize the weight matrix Wtilde (785x10).
 # Then return Wtilde.
 def softmaxRegression(Xtilde, y, epsilon, batchSize, alpha):
-    # initialize epoch
-    epoch = 1
-    batchSize = 2
-    # randomize weights
+    # initialize epoch and randomize weights
+    epoch = 10
     Wtilde = 0.01 * np.random.rand(Xtilde.shape[0],y.shape[0])
     # Compute stochastic gradient descent
     for _ in range(0, epoch):
-        # for i in range(0, (y.shape[1]//batchSize)):
-        for i in range(0, 1):
+        for i in range(0, (y.shape[1]//batchSize)):
             # initiliaze the starting and ending idx of the current batch
             start_idx = i*batchSize
             end_idx = start_idx+batchSize
             # compute the gradient and update the weights based on the current batch
-            gradient = gradfCE(Xtilde[:,start_idx:end_idx], Wtilde, y[:,start_idx:end_idx], alpha)
-            Wtilde -= epsilon*gradient
+            Wtilde -= epsilon*gradfCE(Xtilde[:,start_idx:end_idx], Wtilde, y[:,start_idx:end_idx], alpha)
     return Wtilde
 
 # Given x data set of column vectors, yhat guesses, and y.
@@ -32,6 +28,20 @@ def gradfCE (Xtilde, Wtilde, y, alpha=0):
     z = Xtilde.T.dot(Wtilde)
     yhat = np.exp(z) / np.sum(np.exp(z), axis=1)[:,None]
     return (1/len(y)) * (Xtilde.dot((yhat - y.T)) + (alpha * w))
+
+# Visualization helper
+def vizWeights (weight):
+    # construct 48x48 image from flatten image
+    img = weight[:-1].reshape((28,28))
+    # visualize the image
+    plt.imshow(img, cmap='gray')
+    plt.show()
+
+def fPC (Xtilde, Wtilde, y):
+    z = Xtilde.T.dot(Wtilde)
+    yhat_arr = np.exp(z) / np.sum(np.exp(z), axis=1)[:,None]
+    yhat = np.argmax(yhat_arr, axis=1)
+    return np.mean(yhat == y)
 
 if __name__ == "__main__":
     # Load data
@@ -53,6 +63,9 @@ if __name__ == "__main__":
 
     # Train the model
     Wtilde = softmaxRegression(Xtilde_tr, Ytr, epsilon=0.1, batchSize=100, alpha=.1)
+    print(f"Training fPC: {fPC(Xtilde_tr, Wtilde, trainingLabels)}")
+    print(f"Testing  fPC: {fPC(Xtilde_te, Wtilde, testingLabels)}")
 
     # Visualize the vectors
-    # ...
+    # for i in range(10):
+    #     vizWeights(Wtilde[:,i])
