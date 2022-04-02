@@ -23,7 +23,7 @@ def softmaxRegression(Xtilde, y, epsilon, batchSize, alpha):
 def gradfCE (Xtilde, Wtilde, y, alpha=0):
     # initialize L2 regularization term
     w = np.copy(Wtilde)
-    w[-1] = 0.5
+    w[-1] = 0
     # initialize yhat from activation function yhat = softmax(z)
     z = Xtilde.T.dot(Wtilde)
     yhat = np.exp(z) / np.sum(np.exp(z), axis=1)[:,None]
@@ -67,5 +67,5 @@ if __name__ == "__main__":
     print(f"Testing  fPC: {fPC(Xtilde_te, Wtilde, testingLabels)}")
 
     # Visualize the vectors
-    # for i in range(10):
-    #     vizWeights(Wtilde[:,i])
+    for i in range(10):
+        vizWeights(Wtilde[:,i])
