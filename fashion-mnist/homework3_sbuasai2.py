@@ -34,9 +34,7 @@ def gradfCE (Xtilde, Wtilde, y, alpha=0.):
 # Cross-entropy function
 def fCE (Xtilde, Wtilde, y, alpha=0.):
     # initialize L2 regularized term
-    w = np.copy(Wtilde)
-    w[-1] = 1
-    reg = (alpha/(2*y.shape[0])) * np.trace(w.T.dot(w))
+    reg = (alpha/(2*y.shape[0])) * np.trace(Wtilde[:-1,:].T.dot(Wtilde[:-1,:]))
     # initialize main fCE term
     main = -1 * np.mean(np.sum(y * np.log(softMax(Xtilde, Wtilde)), axis=1))
     return main + reg
