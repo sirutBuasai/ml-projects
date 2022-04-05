@@ -98,5 +98,5 @@ if __name__ == "__main__":
     print(f"Testing  fPC: {fPC(Xtilde_te, Wtilde, testingLabels)}")
 
     # Visualize the vectors
-    # for i in range(10):
-    #     vizWeights(Wtilde[:,i])
+    for i in range(10):
+        vizWeights(Wtilde[:,i])
