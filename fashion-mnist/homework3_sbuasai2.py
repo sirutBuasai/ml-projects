@@ -4,7 +4,10 @@ import matplotlib.pyplot as plt
 # Given training and testing data, learning rate epsilon, batch size, and regularization strength alpha,
 # conduct stochastic gradient descent (SGD) to optimize the weight matrix Wtilde (785x10).
 # Then return Wtilde.
-def softmaxRegression(Xtilde, y, epsilon, batchSize, alpha, showfCE=False):
+# ----------------------------------------------------
+# Argument: Xtilde (trainingImages), y (trainingLabels) ,epsilon, batchSize, alpha, showfCE (bool to show last 20 fCE)
+# Return: Wtilde
+def softmaxRegression(Xtilde, y, epsilon, batchSize, alpha, showfCE=True):
     # initialize epoch and randomize weights
     epoch = 10
     Wtilde = 1e-5 * np.random.rand(Xtilde.shape[0],y.shape[1])
@@ -23,6 +26,9 @@ def softmaxRegression(Xtilde, y, epsilon, batchSize, alpha, showfCE=False):
 
 # Given x data set of column vectors, yhat guesses, and y.
 # Compute the gradient of fCE using formula: 1/n * x.dot((yhat-y))
+# ----------------------------------------------------
+# Argument: Xtilde, Wtilde, y, alpha
+# Return: gradient fCE of current Wtilde
 def gradfCE (Xtilde, Wtilde, y, alpha=0.):
     # initialize L2 regularization term
     w = np.copy(Wtilde)
@@ -32,6 +38,9 @@ def gradfCE (Xtilde, Wtilde, y, alpha=0.):
     return (1/len(y)) * (Xtilde.dot((yhat - y)) + (alpha * w))
 
 # Cross-entropy function
+# ----------------------------------------------------
+# Argument: Xtilde, Wtilde, y, alpha
+# Return: fCE of given Wtilde
 def fCE (Xtilde, Wtilde, y, alpha=0.):
     # initialize L2 regularized term
     reg = (alpha/(2*y.shape[0])) * np.trace(Wtilde[:-1,:].T.dot(Wtilde[:-1,:]))
@@ -40,6 +49,9 @@ def fCE (Xtilde, Wtilde, y, alpha=0.):
     return main + reg
 
 # Percent correct function
+# ----------------------------------------------------
+# Argument: Xtilde, Wtilde, y, alpha
+# Return: fCE of given Wtilde
 def fPC (Xtilde, Wtilde, y):
     # initialize yhat
     yhat_arr = softMax(Xtilde, Wtilde)
