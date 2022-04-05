@@ -93,4 +93,4 @@ if __name__ == "__main__":
     # Write CSV file of the format:
     # PassengerId, Survived
     df = pandas.DataFrame({'PassengerId': PassengerId_te,'Survived': yhat_te})
-    df.to_csv("out.csv", index=False)
+    df.to_csv("result.csv", index=False)
