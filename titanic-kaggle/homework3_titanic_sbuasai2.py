@@ -74,7 +74,7 @@ if __name__ == "__main__":
     Ytr[np.arange(ytr.shape[0]), ytr] = 1
 
     # Train model using part of homework 3.
-    Wtilde = softmaxRegression(Xtilde_tr, Ytr, epsilon=1, batchSize=100, alpha=1)
+    Wtilde = softmaxRegression(Xtilde_tr, Ytr, epsilon=0.1, batchSize=100, alpha=1)
 
     # Load testing data
     dte = pandas.read_csv("test.csv")
