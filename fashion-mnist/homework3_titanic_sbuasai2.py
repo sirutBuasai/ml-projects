@@ -68,7 +68,7 @@ if __name__ == "__main__":
     Pclass_tr = dtr.Pclass.to_numpy()
     SibSp_tr = dtr.SibSp.to_numpy()
 
-    # Stack each attributes onto the one matrix
+    # Stack each sample with one matrix
     Xtilde_tr = np.vstack((sex_tr, Pclass_tr, SibSp_tr, np.ones(ytr.shape[0])))
     Ytr = np.zeros((2, ytr.shape[0])).T
     Ytr[np.arange(ytr.shape[0]), ytr] = 1
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     Pclass_te = dte.Pclass.to_numpy()
     SibSp_te = dte.SibSp.to_numpy()
 
-    # Stack each attributes onto the one matrix
+    # Stack each sample with one matrix
     Xtilde_te = np.vstack((sex_te, Pclass_te, SibSp_te, np.ones(sex_te.shape[0])))
 
     # Compute predictions on test set
