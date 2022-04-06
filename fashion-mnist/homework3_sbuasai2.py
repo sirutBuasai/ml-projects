@@ -92,6 +92,12 @@ if __name__ == "__main__":
     Yte = np.zeros((10, testingLabels.shape[0])).T
     Yte[np.arange(testingLabels.shape[0]), testingLabels] = 1
 
+    # Randomize the order of training samples
+    rand_idx = np.random.permutation(Xtilde_tr.shape[1])
+    Xtilde_tr = Xtilde_tr[:, rand_idx]
+    Ytr = Ytr[rand_idx, :]
+    trainingLabels = trainingLabels[rand_idx]
+
     # Train the model
     Wtilde = softmaxRegression(Xtilde_tr, Ytr, epsilon=0.1, batchSize=100, alpha=0.1, showfCE=True)
     print(f"Training fPC: {fPC(Xtilde_tr, Wtilde, trainingLabels)}")

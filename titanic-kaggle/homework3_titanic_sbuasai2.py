@@ -73,6 +73,12 @@ if __name__ == "__main__":
     Ytr = np.zeros((2, ytr.shape[0])).T
     Ytr[np.arange(ytr.shape[0]), ytr] = 1
 
+    # Randomize the training data
+    rand_idx = np.random.permutation(Xtilde_tr.shape[1])
+    Xtilde_tr = Xtilde_tr[:, rand_idx]
+    Ytr = Ytr[rand_idx, :]
+    ytr = ytr[rand_idx]
+
     # Train model using part of homework 3.
     Wtilde = softmaxRegression(Xtilde_tr, Ytr, epsilon=0.1, batchSize=100, alpha=1)
 
