@@ -43,7 +43,7 @@ def gradfCE (Xtilde, Wtilde, y, alpha=0.):
 # Return: fCE of given Wtilde
 def fCE (Xtilde, Wtilde, y, alpha=0.):
     # initialize L2 regularized term
-    reg = (alpha/(2*y.shape[0])) * np.trace(Wtilde[:-1,:].T.dot(Wtilde[:-1,:]))
+    reg = (alpha/(2*y.shape[0])) * np.sum(Wtilde[:-1,:]**2)
     # initialize main fCE term
     main = -1 * np.mean(np.sum(y * np.log(softMax(Xtilde, Wtilde)), axis=1))
     return main + reg
