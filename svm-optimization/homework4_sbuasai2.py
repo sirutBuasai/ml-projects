@@ -11,7 +11,6 @@ class SVM4342 ():
     # y should correspondingly be an n-vector of labels (-1 or +1).
     def fit (self, X, y):
         Xtilde = np.column_stack((X, np.ones(X.shape[0])))
-        print(Xtilde.shape)
 
         G = -1 * y[:,None] * Xtilde
         h = np.full((Xtilde.shape[0], 1), -1)
@@ -26,7 +25,6 @@ class SVM4342 ():
         # it becomes a 1-D np.array.
         
         Wtilde = np.array(sol['x'])
-        print(Wtilde[:,:-1].dot(P))
         self.w = Wtilde[:-1].reshape((Wtilde[:-1].shape[0]))
         self.b = Wtilde[-1]
 

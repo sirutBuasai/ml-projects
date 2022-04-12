@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from homework4_sbuasai2 import SVM4342
 
 def normalToSlope (normal_vector):
     x,y = normal_vector
@@ -38,4 +39,18 @@ y_down2 = 0.3*x-1.2
 plt.plot(x, y2, 'b-')
 plt.plot(x, y_up2, 'b--')
 plt.plot(x, y_down2, 'b:')
+
+# H3
+Wtilde = SVM4342()
+Wtilde.fit(X.T, y)
+b3 = Wtilde.b
+w3 = Wtilde.w
+slope3 = normalToSlope(w3)
+y3 = -0.285714*x-2.35714
+y_up3 = -0.285714*x-(9.42857e-8)
+y_down3 = -0.285714*x-4.71429
+
+plt.plot(x, y3, 'r-')
+plt.plot(x, y_up3, 'r--')
+plt.plot(x, y_down3, 'r:')
 plt.show()
