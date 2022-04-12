@@ -1,0 +1,31 @@
+1)
+H-: x = -6, y = -3
+H+: x =  0, y =  0 
+System of equations:
+0w_1 + 0w_2 + b-1 = 0
+-6w_1 - 3w_2 + b+1 = 0
+w_1 = m*0
+w_2 = m*1
+--------------------
+m = 2/3
+b = 1
+Solve for y on the following:
+x(w_1) + y(w_2) + b = 0
+x(w_1) + y(w_2) + b = 1
+x(w_1) + y(w_2) + b = +1
+
+3)
+H-: x = -6, y = -3
+H+: x =  5, y =  1
+System of equations:
+5w_1 + 1w_2 + b-1 = 0
+-6w_1 - 3w_2 + b+1 = 0
+w_1 = m*-0.3
+w_2 = m*1
+--------------------
+m = 2.85714
+b = 2.42857
+Solve for y on the following:
+x(w_1) + y(w_2) + b = 0
+x(w_1) + y(w_2) + b = 1
+x(w_1) + y(w_2) + b = +1
