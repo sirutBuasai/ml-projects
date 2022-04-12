@@ -10,26 +10,30 @@ class SVM4342 ():
     # contain n rows, where n is the number of examples.
     # y should correspondingly be an n-vector of labels (-1 or +1).
     def fit (self, X, y):
-        # TODO change these -- they should be np.arrays representing matrices or vectors
-        G = 0
-        h = 0
-        P = 0
-        q = 0
+        Xtilde = np.column_stack((X, np.ones(X.shape[0])))
+        print(Xtilde.shape)
+
+        G = -1 * y[:,None] * Xtilde
+        h = np.full((Xtilde.shape[0], 1), -1)
+        P = np.eye(Xtilde.shape[1])
+        q = np.zeros(Xtilde.shape[1])
 
         # Solve -- if the variables above are defined correctly, you can call this as-is:
         sol = solvers.qp(matrix(P, tc='d'), matrix(q, tc='d'), matrix(G, tc='d'), matrix(h, tc='d'))
-
         # Fetch the learned hyperplane and bias parameters out of sol['x']
         # To avoid any annoying errors due to broadcasting issues, I recommend
         # that you flatten() the w you retrieve from the solution vector so that
         # it becomes a 1-D np.array.
         
-        self.w = 0  # TODO change this
-        self.b = 0  # TODO change this
+        Wtilde = np.array(sol['x'])
+        print(Wtilde[:,:-1].dot(P))
+        self.w = Wtilde[:-1].reshape((Wtilde[:-1].shape[0]))
+        self.b = Wtilde[-1]
 
     # Given a 2-D matrix of examples X, output a vector of predicted class labels
     def predict (self, x):
-        return 0  # TODO fix
+        yhat = x.dot(self.w) + self.b
+        return np.sign(yhat)
 
 def test1 ():
     # Set up toy problem
