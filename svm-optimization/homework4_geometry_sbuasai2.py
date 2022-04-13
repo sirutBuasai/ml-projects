@@ -18,7 +18,7 @@ def findWeight (normal, coord_up, coord_down):
     # Solve for m and b given the two equations
     m = 2/(n_1*(x_1-x_2) + n_2*(y_1-y_2))
     b = 1 - x_1*m*n_1 - y_1*m*n_2
-    # normal weight vector w is m multipled of normal vector (w = m*n)
+    # normal weight vector w is m multiple of normal vector (w = m*n)
     w = np.array([n_1,n_2])*m
     return w, b
 
