@@ -38,7 +38,7 @@ def pack (W1, b1, W2, b2):
 # Load the images and labels from a specified dataset (train or test).
 def loadData (which):
     images = np.load("fashion_mnist_{}_images.npy".format(which)).T / 255.
-    labels = np.load("fashion_mnist_{}_labels.npy".format(which)))
+    labels = np.load("fashion_mnist_{}_labels.npy".format(which))
 
     # TODO: Convert labels vector to one-hot matrix (C x N).
     # ...
