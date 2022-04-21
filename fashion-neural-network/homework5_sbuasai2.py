@@ -66,6 +66,47 @@ def gradCE (X, Y, w):
 
     return grad
 
+#
+# Helper functions ########################################
+# ReLU: Given an array z, return the ReLU(z)
+# ---------------------------------------------------------
+# Argument: z
+# Return: z
+def ReLU (z):
+    z[z<=0] = 0
+    return z
+
+# ReLUPrime: given an array z, return the derivative of z
+# ---------------------------------------------------------
+# Argument: z
+# Return: z
+def ReLUPrime (z):
+    z[z<=0] = 0
+    z[z>1] = 1
+    return z
+
+# Percent correct function: given Xtilde, Wtilde, calculate yhat
+# and return percent correct wrt to y
+# ----------------------------------------------------
+# Argument: Xtilde, Wtilde, y, alpha
+# Return: fPC
+def fPC (Xtilde, Wtilde, y):
+    # initialize yhat
+    yhat_arr = softMax(Xtilde, Wtilde)
+    # compute yhat guesses into concrete result
+    # eg: if yhat_arr = [0.6,0.2,0.2], yhat = [1,0,0]
+    yhat = np.argmax(yhat_arr, axis=1)
+    return np.mean(yhat == y)
+
+# SoftMax helper funciton to compute yhat
+# ----------------------------------------------------
+# Argument: Xtilde, Wtilde
+# Return: yhat
+def softMax (Xtilde, Wtilde):
+    z = Xtilde.T.dot(Wtilde)
+    yhat = np.exp(z) / np.sum(np.exp(z), axis=1)[:,None]
+    return yhat
+
 # Given training and testing datasets and an initial set of weights/biases b,
 # train the NN.
 def train (trainX, trainY, testX, testY, w):

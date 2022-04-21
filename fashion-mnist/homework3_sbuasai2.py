@@ -51,7 +51,7 @@ def fCE (Xtilde, Wtilde, y, alpha=0.):
 # Percent correct function
 # ----------------------------------------------------
 # Argument: Xtilde, Wtilde, y, alpha
-# Return: fCE of given Wtilde
+# Return: fPC of given Wtilde
 def fPC (Xtilde, Wtilde, y):
     # initialize yhat
     yhat_arr = softMax(Xtilde, Wtilde)
@@ -60,7 +60,10 @@ def fPC (Xtilde, Wtilde, y):
     yhat = np.argmax(yhat_arr, axis=1)
     return np.mean(yhat == y)
 
-# softMax helper to compute yhat
+# SoftMax helper funciton to compute yhat
+# ----------------------------------------------------
+# Argument: Xtilde, Wtilde
+# Return: yhat
 def softMax (Xtilde, Wtilde):
     z = Xtilde.T.dot(Wtilde)
     yhat = np.exp(z) / np.sum(np.exp(z), axis=1)[:,None]
