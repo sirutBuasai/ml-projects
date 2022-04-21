@@ -37,13 +37,15 @@ def pack (W1, b1, W2, b2):
 
 # Load the images and labels from a specified dataset (train or test).
 def loadData (which):
-    images = np.load("fashion_mnist_{}_images.npy".format(which)).T / 255.
+    images = np.load("fashion_mnist_{}_images.npy".format(which)) / 255.
     labels = np.load("fashion_mnist_{}_labels.npy".format(which))
 
-    # TODO: Convert labels vector to one-hot matrix (C x N).
-    # ...
-    
-    return images, labels
+    # Convert labels vector to one-hot matrix (C x N).
+    imagesTilde = np.column_stack((images, np.ones(images.shape[0]))).T
+    labelsTilde = np.zeros((10, labels.shape[0])).T
+    labelsTilde[np.arange(labels.shape[0]), labels] = 1
+
+    return imagesTilde, labelsTilde
 
 # Given training images X, associated labels Y, and a vector of combined weights
 # and bias terms w, compute and return the cross-entropy (CE) loss, accuracy,
