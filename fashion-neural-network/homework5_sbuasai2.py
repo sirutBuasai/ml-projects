@@ -65,12 +65,12 @@ def fCE (X, Y, w, alpha=0.):
 # and bias terms w, compute and return the gradient of fCE. You might
 # want to extend this function to return multiple arguments (in which case you
 # will also need to modify slightly the gradient check code below).
-def gradCE (X, Y, w):
+def gradCE (X, Y, w, alpha=0.):
     W1, b1, W2, b2 = unpack(w)
     z1,h1,yhat = forwardProp(X,w)
 
-    db2 = np.mean(yhat - Y, axis=0)
-    dW2 = (yhat - Y).dot(h1.T)
+    db2 = (yhat-Y).dot(h1.T)
+    dW2 = (yhat - Y)
     g = (yhat - Y).T.dot(W2).T * ReLUPrime(z1)
     db1 = np.mean(g, axis=0)
     dW1 = X.dot(g.T)
@@ -189,7 +189,7 @@ if __name__ == "__main__":
     # Concatenate all the weights and biases into one vector; this is necessary for check_grad
     w = pack(W1, b1, W2, b2)
     alpha = 1e-3
-    fCE(trainX, trainY, w, alpha)
+    gradCE(trainX, trainY, w, alpha)
 
     # Check that the gradient is correct on just a few examples (randomly drawn).
     # idxs = np.random.permutation(trainX.shape[0])[0:NUM_CHECK]
