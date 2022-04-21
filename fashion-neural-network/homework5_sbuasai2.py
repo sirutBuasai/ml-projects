@@ -10,7 +10,9 @@ NUM_CHECK = 5  # Number of examples on which to check the gradient
 # Given a vector w containing all the weights and biased vectors, extract
 # and return the individual weights and biases W1, b1, W2, b2.
 # This is useful for performing a gradient check with check_grad.
-def unpack (w):
+
+
+def unpack(w):
     # Unpack arguments
     start = 0
     end = NUM_HIDDEN*NUM_INPUT
@@ -27,16 +29,16 @@ def unpack (w):
     # Convert from vectors into matrices
     W1 = W1.reshape(NUM_HIDDEN, NUM_INPUT)
     W2 = W2.reshape(NUM_OUTPUT, NUM_HIDDEN)
-    return W1,b1,W2,b2
+    return W1, b1, W2, b2
 
 # Given individual weights and biases W1, b1, W2, b2, concatenate them and
 # return a vector w containing all of them.
 # This is useful for performing a gradient check with check_grad.
-def pack (W1, b1, W2, b2):
+def pack(W1, b1, W2, b2):
     return np.hstack((W1.flatten(), b1, W2.flatten(), b2))
 
 # Load the images and labels from a specified dataset (train or test).
-def loadData (which):
+def loadData(which):
     images = np.load("fashion_mnist_{}_images.npy".format(which)).T / 255.
     labels = np.load("fashion_mnist_{}_labels.npy".format(which))
 
@@ -49,10 +51,10 @@ def loadData (which):
 # Given training images X, associated labels Y, and a vector of combined weights
 # and bias terms w, compute and return the cross-entropy (CE) loss, accuracy,
 # as well as the intermediate values of the NN.
-def fCE (X, Y, w, alpha=0.):
+def fCE(X, Y, w, alpha=0.):
     W1, b1, W2, b2 = unpack(w)
     # get z1,h1,yhat from forward propagation
-    z1,h1,yhat = forwardProp(X,w)
+    z1, h1, yhat = forwardProp(X, w)
     acc = fPC(yhat, Y)
     # calculate regularlized fCE
     reg = (alpha*(2*Y.shape[1])) * (np.sum(W1**2)+np.sum(W2**2))
@@ -65,9 +67,9 @@ def fCE (X, Y, w, alpha=0.):
 # and bias terms w, compute and return the gradient of fCE. You might
 # want to extend this function to return multiple arguments (in which case you
 # will also need to modify slightly the gradient check code below).
-def gradCE (X, Y, w, alpha=0.):
+def gradCE(X, Y, w, alpha=0.):
     W1, b1, W2, b2 = unpack(w)
-    z1,h1,yhat = forwardProp(X,w)
+    z1, h1, yhat = forwardProp(X, w)
 
     db2 = (yhat-Y).dot(h1.T)
     dW2 = (yhat - Y)
@@ -85,17 +87,17 @@ def gradCE (X, Y, w, alpha=0.):
 # ---------------------------------------------------------
 # Argument: z
 # Return: z
-def ReLU (z):
-    z[z<=0] = 0
+def ReLU(z):
+    z[z <= 0] = 0
     return z
 
 # ReLUPrime: given an array z, return the derivative of z
 # ---------------------------------------------------------
 # Argument: z
 # Return: z
-def ReLUPrime (z):
-    z[z<=0] = 0
-    z[z>1] = 1
+def ReLUPrime(z):
+    z[z <= 0] = 0
+    z[z > 1] = 1
     return z
 
 # Percent correct function: given Xtilde, Wtilde, calculate yhat
@@ -103,7 +105,7 @@ def ReLUPrime (z):
 # ----------------------------------------------------
 # Argument: Xtilde, Wtilde, y, alpha
 # Return: fPC
-def fPC (yhat, y):
+def fPC(yhat, y):
     # compute yhat guesses into concrete result
     # eg: yhat = [0.6,0.2,0.2] -> yhat = [1,0,0]
     max_idx = np.argmax(yhat, axis=0)
@@ -115,60 +117,60 @@ def fPC (yhat, y):
 # ----------------------------------------------------
 # Argument: z
 # Return: yhat
-def softMax (z):
-    yhat = np.exp(z) / np.sum(np.exp(z), axis=1)[:,None]
+def softMax(z):
+    yhat = np.exp(z) / np.sum(np.exp(z), axis=1)[:, None]
     return yhat
 
 # Forward propagation helper funciton to z1, h1, z2, yhat
 # ----------------------------------------------------
 # Argument: z
 # Return: yhat
-def forwardProp (X, w):
-    W1,b1,W2,b2 = unpack(w)
-    z1 = W1.dot(X) + b1[:,None]
+def forwardProp(X, w):
+    W1, b1, W2, b2 = unpack(w)
+    z1 = W1.dot(X) + b1[:, None]
     h1 = ReLU(z1)
-    z2 = W2.dot(h1) + b2[:,None]
+    z2 = W2.dot(h1) + b2[:, None]
     yhat = softMax(z2)
-    return z1,h1,yhat
+    return z1, h1, yhat
 
 # Visualization helper
 # ----------------------------------------------------
 # Argument: x
 # Return: void
-def visualize (x):
+def visualize(x):
     # construct 48x48 image from flatten image
-    img = x.reshape((28,28))
+    img = x.reshape((28, 28))
     # visualize the image
     plt.imshow(img, cmap='gray')
     plt.show()
 
 # Given training and testing datasets and an initial set of weights/biases b,
 # train the NN.
-def train (trainX, trainY, testX, testY, w):
+def train(trainX, trainY, testX, testY, w):
     EPOCH = 10
     BATCH_SIZE = 1
     LEARNING_RATE = 3e-3
     ALPHA = 1e-3
     b = 0.1
-    W1,b1,W2,b2 = unpack(w)
+    W1, b1, W2, b2 = unpack(w)
 
     for e in range(EPOCH):
         # randomize the samples
         rand_idx = np.random.permutation(trainX.shape[1])
-        randX = trainX[:,rand_idx]
-        randY = trainY[:,rand_idx]
+        randX = trainX[:, rand_idx]
+        randY = trainY[:, rand_idx]
         # process the epoch batch by batch
         for i in range(0, (trainY.shape[1]//BATCH_SIZE)):
             # initialize the starting and ending index of the current batch
             start_idx = i*BATCH_SIZE
             end_idx = start_idx+BATCH_SIZE
-            batchX = randX[:,start_idx:end_idx]
-            batchY = randY[:,start_idx:end_idx]
+            batchX = randX[:, start_idx:end_idx]
+            batchY = randY[:, start_idx:end_idx]
             # compute the gradient and update the weights based on the current batch
             grad = w * b + gradCE(batchX, batchY, w) * (1 - b)
             w = w - (LEARNING_RATE * grad)
 
-    cost, acc, _,_,_,_,_ = fCE(trainX, trainY, w, ALPHA)
+    cost, acc, _, _, _, _, _ = fCE(trainX, trainY, w, ALPHA)
     print("Loss:", cost)
     print("Accuracy:", acc)
 
@@ -181,11 +183,13 @@ if __name__ == "__main__":
     testX, testY = loadData("test")
 
     # Initialize weights randomly
-    W1 = 2*(np.random.random(size=(NUM_HIDDEN, NUM_INPUT))/NUM_INPUT**0.5) - 1./NUM_INPUT**0.5
+    W1 = 2*(np.random.random(size=(NUM_HIDDEN, NUM_INPUT)) /
+            NUM_INPUT**0.5) - 1./NUM_INPUT**0.5
     b1 = 0.01 * np.ones(NUM_HIDDEN)
-    W2 = 2*(np.random.random(size=(NUM_OUTPUT, NUM_HIDDEN))/NUM_HIDDEN**0.5) - 1./NUM_HIDDEN**0.5
+    W2 = 2*(np.random.random(size=(NUM_OUTPUT, NUM_HIDDEN)) /
+            NUM_HIDDEN**0.5) - 1./NUM_HIDDEN**0.5
     b2 = 0.01 * np.ones(NUM_OUTPUT)
-    
+
     # Concatenate all the weights and biases into one vector; this is necessary for check_grad
     w = pack(W1, b1, W2, b2)
     alpha = 1e-3
