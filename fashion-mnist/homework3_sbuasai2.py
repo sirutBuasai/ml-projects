@@ -14,9 +14,10 @@ def softmaxRegression(Xtilde, y, epsilon, batchSize, alpha, showfCE=True):
     # Compute stochastic gradient descent
     for e in range(0, epoch):
         for i in range(0, (y.shape[0]//batchSize)):
-            # initiliaze the starting and ending idx of the current batch
+            # initialize the starting and ending idx of the current batch
             start_idx = i*batchSize
             end_idx = start_idx+batchSize
+            print(Xtilde.shape)
             # compute the gradient and update the weights based on the current batch
             Wtilde -= epsilon*gradfCE(Xtilde[:,start_idx:end_idx], Wtilde, y[start_idx:end_idx,:], alpha)
             # print out last 20 SDG batches
