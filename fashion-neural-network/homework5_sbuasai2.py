@@ -40,28 +40,23 @@ def pack(W1, b1, W2, b2):
 
 # Load the images and labels from a specified dataset (train or test).
 def loadData(which):
-    images = np.load("fashion_mnist_{}_images.npy".format(which)).T / 255.
+    images = np.load("fashion_mnist_{}_images.npy".format(which)) / 255.
     labels = np.load("fashion_mnist_{}_labels.npy".format(which))
 
-    # Convert labels vector to one-hot matrix (C x N).
+    # Convert labels vector to one-hot matrix (N x C).
     labelsTilde = np.zeros((10, labels.shape[0])).T
     labelsTilde[np.arange(labels.shape[0]), labels] = 1
 
-    return images, labelsTilde.T
+    return images, labelsTilde
 
 # Given training images X, associated labels Y, and a vector of combined weights
 # and bias terms w, compute and return the cross-entropy (CE) loss, accuracy,
 # as well as the intermediate values of the NN.
-def fCE(X, Y, w, alpha=0., show=False): #CHECK
+def fCE(X, Y, w, alpha=0.): #CHECK
     W1, b1, W2, b2 = unpack(w)
     # get z1,h1,yhat from forward propagation
     z1, h1, z2, yhat = forwardProp(X, w)
-    if show:
-        print(yhat.T)
-        print(Y)
-        print(np.array([np.argmax(i) for i in yhat.T]))
-        print(np.array([np.argmax(j) for j in Y]))
-
+    # get percent correct accuracy
     acc = fPC(yhat.T, Y)
     # calculate regularlized fCE
     cost = -1 * np.mean(np.sum(Y * np.log(yhat.T), axis=1))
@@ -78,11 +73,11 @@ def gradCE(X, Y, w, alpha=0.): #CHECK
 
     db2 = np.mean(yhat.T - Y, axis=0)
     dW2 = np.atleast_2d(yhat.T - Y).T.dot(h1).T
-    g = (yhat.T - Y).dot(W2) * ReLUPrime(z1)
+    g = ((yhat.T - Y).dot(W2)) * ReLUPrime(z1)
     db1 = np.mean(g, axis=0)
     dW1 = X.T.dot(np.atleast_2d(g))
 
-    grad = pack(dW1, db1, dW2, db2)
+    grad = pack(dW1.T, db1, dW2.T, db2)
 
     return grad
 
@@ -92,7 +87,7 @@ def gradCE(X, Y, w, alpha=0.): #CHECK
 # ---------------------------------------------------------
 # Argument: z
 # Return: z
-def ReLU(z):
+def ReLU(z): #CHECK
     z[z <= 0] = 0
     return z
 
@@ -102,7 +97,7 @@ def ReLU(z):
 # Return: z
 def ReLUPrime(z): #CHECK
     z[z <= 0] = 0
-    z[z > 1] = 1
+    z[z > 0] = 1
     return z
 
 # Percent correct function: given Xtilde, Wtilde, calculate yhat
@@ -110,12 +105,12 @@ def ReLUPrime(z): #CHECK
 # ----------------------------------------------------
 # Argument: yhat, y
 # Return: fPC
-def fPC(guess, ground_truth): #CHECK
+def fPC(guess, ground_truth):
     # compute yhat guesses into concrete result
     # eg: yhat = [0.6,0.2,0.2] -> yhat = [1,0,0]
-
     yhat = np.array([np.argmax(i) for i in guess])
-    y = np.array([np.argmax(j) for j in ground_truth])
+    y =np.array([np.argmax(i) for i in ground_truth])
+
     return np.mean(yhat == y)
 
 # SoftMax helper funciton to compute yhat
@@ -123,10 +118,10 @@ def fPC(guess, ground_truth): #CHECK
 # Argument: z
 # Return: yhat
 def softMax(z): #CHECK
-    num = np.exp(z)
-    denom = np.sum(np.exp(z), axis=1)[:,None]
+    num = np.exp(z).T
+    denom = np.atleast_2d(np.exp(z)).sum(axis=1)
     yhat = num / denom
-    return yhat.T
+    return yhat
 
 # Forward propagation helper funciton to z1, h1, z2, yhat
 # ----------------------------------------------------
@@ -187,23 +182,23 @@ def train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha):
 
     for e in range(EPOCH):
         # randomize the samples
-        rand_idx = np.random.permutation(trainX.shape[1])
-        randX = trainX[:, rand_idx]
-        randY = trainY[:, rand_idx]
+        rand_idx = np.random.permutation(trainX.shape[0])
+        randX = trainX[rand_idx,:]
+        randY = trainY[rand_idx,:]
         # process the epoch batch by batch
-        for i in range(0, (trainY.shape[1]//BATCH_SIZE)):
+        for i in range(0, (trainY.shape[0]//BATCH_SIZE)):
             # initialize the starting and ending index of the current batch
             start_idx = i*BATCH_SIZE
             end_idx = start_idx+BATCH_SIZE
-            batchX = randX[:, start_idx:end_idx]
-            batchY = randY[:, start_idx:end_idx]
+            batchX = randX[start_idx:end_idx,:]
+            batchY = randY[start_idx:end_idx,:]
             # compute the gradient and update the weights based on the current batch
-            grad = w * ALPHA + gradCE(batchX.T, batchY.T, w) * (1 - ALPHA)
+            grad = w * ALPHA + gradCE(batchX, batchY, w) * (1 - ALPHA)
             w -= LEARNING_RATE * grad
 
 
-    cost, acc, _, _, _, _, _ = fCE(trainX.T, trainY.T, w, alpha, show=True)
-    print("Loss:", cost)
+    cost, acc, _, _, _, _, _ = fCE(trainX, trainY, w, alpha)
+    print("Cost:", cost)
     print("Accuracy:", acc)
     return cost, acc
 
@@ -234,6 +229,6 @@ if __name__ == "__main__":
     #                                 w))
 
     # # # # Train the network using SGD.
-    e,b,l,a = findBestHyperparameters(trainX, trainY, testX, testY, w)
-    # e,b,l = 30, 100, 0.05
+    # e,b,l,a = findBestHyperparameters(trainX, trainY, testX, testY, w)
+    e,b,l,a = 100, 50, 0.001, 0.01
     train(trainX, trainY, testX, testY, w, e, b, l, a)
