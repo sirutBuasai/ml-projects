@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 import scipy.optimize
 import random
 
+EPOCH = 30  # Number of epochs
+BATCH_SIZE = 16  # Size of SGD batch
+LEARNING_RATE = 0.001   # Gradient descent rate
+ALPHA = 0.001   # Regularization strength
 NUM_INPUT = 784  # Number of input neurons
 NUM_HIDDEN = 40  # Number of hidden neurons
 NUM_OUTPUT = 10  # Number of output neurons
@@ -40,26 +44,26 @@ def pack(W1, b1, W2, b2):
 
 # Load the images and labels from a specified dataset (train or test).
 def loadData(which):
-    images = np.load("fashion_mnist_{}_images.npy".format(which)) / 255.
+    images = np.load("fashion_mnist_{}_images.npy".format(which)).T / 255.
     labels = np.load("fashion_mnist_{}_labels.npy".format(which))
 
-    # Convert labels vector to one-hot matrix (N x C).
+    # Convert labels vector to one-hot matrix (C x N).
     labelsTilde = np.zeros((10, labels.shape[0])).T
     labelsTilde[np.arange(labels.shape[0]), labels] = 1
 
-    return images, labelsTilde
+    return images, labelsTilde.T
 
 # Given training images X, associated labels Y, and a vector of combined weights
 # and bias terms w, compute and return the cross-entropy (CE) loss, accuracy,
 # as well as the intermediate values of the NN.
-def fCE(X, Y, w, alpha=0.): #CHECK
+def fCE(X, Y, w, alpha=0.):
     W1, b1, W2, b2 = unpack(w)
     # get z1,h1,yhat from forward propagation
     z1, h1, z2, yhat = forwardProp(X, w)
     # get percent correct accuracy
-    acc = fPC(yhat.T, Y)
+    acc = fPC(yhat.T, Y.T)
     # calculate regularlized fCE
-    cost = -1 * np.mean(np.sum(Y * np.log(yhat.T), axis=1))
+    cost = -1 * np.mean(np.sum(Y * np.log(yhat), axis=0))
 
     return cost, acc, z1, h1, W1, W2, yhat
 
@@ -67,19 +71,19 @@ def fCE(X, Y, w, alpha=0.): #CHECK
 # and bias terms w, compute and return the gradient of fCE. You might
 # want to extend this function to return multiple arguments (in which case you
 # will also need to modify slightly the gradient check code below).
-def gradCE(X, Y, w, alpha=0.): #CHECK
+def gradCE(X, Y, w, alpha=0.):
     W1, b1, W2, b2 = unpack(w)
     z1, h1, z2, yhat = forwardProp(X, w)
 
-    db2 = np.mean(yhat.T - Y, axis=0)
-    dW2 = np.atleast_2d(yhat.T - Y).T.dot(h1).T
-    g = ((yhat.T - Y).dot(W2)) * ReLUPrime(z1)
-    db1 = np.mean(g, axis=0)
-    dW1 = X.T.dot(np.atleast_2d(g))
+    db2 = np.mean(yhat - Y, axis=1) ## FIRST WARNING
+    dW2 = np.atleast_2d(yhat - Y).dot(h1)
+    g = ((yhat - Y).T.dot(W2) * ReLUPrime(z1)).T ## SECOND WARNING
+    db1 = np.mean(g, axis=1) ## SECOND ISH WARNING FROM LAST ONE
+    dW1 = np.atleast_2d(g).dot(X.T)
 
-    grad = pack(dW1.T, db1, dW2.T, db2)
+    grad = pack(dW1, db1, dW2, db2)
 
-    return grad
+    return w * alpha + grad * (1 - alpha)
 
 #
 # Helper functions ########################################
@@ -87,7 +91,7 @@ def gradCE(X, Y, w, alpha=0.): #CHECK
 # ---------------------------------------------------------
 # Argument: z
 # Return: z
-def ReLU(z): #CHECK
+def ReLU(z):
     z[z <= 0] = 0
     return z
 
@@ -95,7 +99,7 @@ def ReLU(z): #CHECK
 # ---------------------------------------------------------
 # Argument: z
 # Return: z
-def ReLUPrime(z): #CHECK
+def ReLUPrime(z):
     z[z <= 0] = 0
     z[z > 0] = 1
     return z
@@ -108,8 +112,8 @@ def ReLUPrime(z): #CHECK
 def fPC(guess, ground_truth):
     # compute yhat guesses into concrete result
     # eg: yhat = [0.6,0.2,0.2] -> yhat = [1,0,0]
-    yhat = np.array([np.argmax(i) for i in guess])
-    y =np.array([np.argmax(i) for i in ground_truth])
+    yhat = np.argmax(guess, axis=1)
+    y = np.argmax(ground_truth, axis=1)
 
     return np.mean(yhat == y)
 
@@ -117,7 +121,7 @@ def fPC(guess, ground_truth):
 # ----------------------------------------------------
 # Argument: z
 # Return: yhat
-def softMax(z): #CHECK
+def softMax(z):
     num = np.exp(z).T
     denom = np.atleast_2d(np.exp(z)).sum(axis=1)
     yhat = num / denom
@@ -127,74 +131,119 @@ def softMax(z): #CHECK
 # ----------------------------------------------------
 # Argument: X, w
 # Return: z1, h1, z2, yhat
-def forwardProp(X, w): #CHECK
+def forwardProp(X, w):
     W1, b1, W2, b2 = unpack(w)
 
-    z1 = X.dot(W1.T) + b1
+    z1 = W1.dot(X).T + b1
     h1 = ReLU(z1)
-    z2 = h1.dot(W2.T) + b2
+    z2 = W2.dot(h1.T).T + b2
     yhat = softMax(z2)
 
     return z1, h1, z2, yhat
 
-# Visualization helper
+# Find the best hyper parameters using the validation set
 # ----------------------------------------------------
 # Argument: x
 # Return: void
-def visualize(x):
-    # construct 48x48 image from flatten image
-    img = x.reshape((28, 28))
-    # visualize the image
-    plt.imshow(img, cmap='gray')
-    plt.show()
-
 def findBestHyperparameters(trainX, trainY, testX, testY, w):
-    epochTrain = [10, 20, 30, 40, 50, 75, 100]
-    batchSizeTrain = [16, 32, 64, 128, 256]
-    learningRateTrain = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05]
-    alphaTrain = [0.001]
+    # initialize the possible hyperparameters
+    hidden_layer_list = np.array([30, 40, 50])
+    batch_list = np.array([16, 32, 64, 128, 256])
+    learn_rate_list = np.array([0.001, 0.005, 0.01, 0.05, 0.1, 0.5])
+    epoch_list = np.array([10, 25, 50, 75, 100])
+    reg_list = np.array([0.001, 0.005, 0.01, 0.05, 0.1, 0.5])
+    # initialize a dictionary to store the optimal hyperparameters
+    best_hp = {
+        'hidden': 0.0,
+        'batch': 0.0,
+        'learn_rate': 0.0,
+        'epoch': 0.0,
+        'reg_str': 0.0,
+        'cost': float('inf'),
+        'accuracy': 0.0
+    }
 
-    optimal = {'Epoch': 0, 'Batch': 0, 'learnRate': 0.0, 'Cost': float('inf'), 'Accuracy': 0.0, 'Alpha': 1e-3}
+    for i in range(10):
+        # randomly choose a set of hyperparameters
+        NUM_HIDDEN = np.random.choice(hidden_layer_list)
+        BATCH_SIZE = np.random.choice(batch_list)
+        LEARNING_RATE = np.random.choice(learn_rate_list)
+        EPOCH = np.random.choice(epoch_list)
+        ALPHA = np.random.choice(reg_list)
 
-    for x in range(1,10):
-        epochs = random.choice(epochTrain)
-        learn_rate = random.choice(learningRateTrain)
-        batch = random.choice(batchSizeTrain)
-        alpha = random.choice(alphaTrain)
-        cost, acc = train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha, test=False)
-        print("Hyper Parameters in run ",x, "\nEpochs: ", epochs, "\nLearning Rate: ", learn_rate, "\nBatch Size: ", batch)
+        # randomly initialize the weights
+        W1 = 2*(np.random.random(size=(NUM_HIDDEN, NUM_INPUT))/NUM_INPUT**0.5) - 1./NUM_INPUT**0.5
+        b1 = 0.01 * np.ones(NUM_HIDDEN)
+        W2 = 2*(np.random.random(size=(NUM_OUTPUT, NUM_HIDDEN))/NUM_HIDDEN**0.5) - 1./NUM_HIDDEN**0.5
+        b2 = 0.01 * np.ones(NUM_OUTPUT)
+        w = pack(W1, b1, W2, b2)
 
-        if cost < optimal.get('Cost') and acc > optimal.get('Accuracy'):
-            optimal.update(Epoch = epochs, Batch = batch, learnRate = learn_rate, Cost = cost, Accuracy = acc)
+        # train the model using given hyperparameters
+        print("Run ", i)
+        print("Training hyperparameters:")
+        print("Hidden layers: ", NUM_HIDDEN)
+        print("Batch size: ", BATCH_SIZE)
+        print("Learning rate: ", LEARNING_RATE)
+        print("Epoch: ", EPOCH)
+        print("Regularization strength: ", ALPHA)
+        cost, acc = train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=False)
 
-    print(optimal)
+        # update the optimal hyperparameters if the cost is lower and the accuracy is higher
+        if (cost < best_hp['cost']) and (acc > best_hp['accuracy']):
+            best_hp.update(hidden = NUM_HIDDEN,
+                           batch = BATCH_SIZE,
+                           learn_rate = LEARNING_RATE,
+                           epoch = EPOCH,
+                           reg_str = ALPHA,
+                           cost = cost,
+                           accuracy = acc)
 
-    return optimal.get('Epoch'), optimal.get('Batch'), optimal.get('learnRate'), optimal.get('Alpha')
+    print(best_hp)
+    return best_hp['hidden'], best_hp['batch'], best_hp['learn_rate'], best_hp['epoch'], best_hp['reg_str']
+
+
+# def findBestHyperparameters(trainX, trainY, testX, testY, w):
+#     epochTrain = [10, 20, 30, 40, 50, 75, 100]
+#     batchSizeTrain = [16, 32, 64, 128, 256]
+#     learningRateTrain = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5]
+#     alphaTrain = [0.001]
+
+#     optimal = {'Epoch': 0, 'Batch': 0, 'learnRate': 0.0, 'Cost': float('inf'), 'Accuracy': 0.0, 'Alpha': 1e-3}
+
+#     for x in range(1,10):
+#         epochs = random.choice(epochTrain)
+#         learn_rate = random.choice(learningRateTrain)
+#         batch = random.choice(batchSizeTrain)
+#         alpha = random.choice(alphaTrain)
+#         cost, acc = train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha, test=False)
+#         print("Hyper Parameters in run ",x, "\nEpochs: ", epochs, "\nLearning Rate: ", learn_rate, "\nBatch Size: ", batch)
+
+#         if cost < optimal.get('Cost') and acc > optimal.get('Accuracy'):
+#             optimal.update(Epoch = epochs, Batch = batch, learnRate = learn_rate, Cost = cost, Accuracy = acc)
+
+#     print(optimal)
+
+#     return optimal.get('Epoch'), optimal.get('Batch'), optimal.get('learnRate'), optimal.get('Alpha')
 
 # Given training and testing datasets and an initial set of weights/biases b,
 # train the NN.
 def train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha, test=False):
-    EPOCH = epochs
-    BATCH_SIZE = batch
-    LEARNING_RATE = learn_rate
-    ALPHA = alpha
     W1, b1, W2, b2 = unpack(w)
 
-    for e in range(EPOCH):
+    for e in range(epochs):
         # randomize the samples
-        rand_idx = np.random.permutation(trainX.shape[0])
-        randX = trainX[rand_idx,:]
-        randY = trainY[rand_idx,:]
+        rand_idx = np.random.permutation(trainX.shape[1])
+        randX = trainX[:,rand_idx]
+        randY = trainY[:,rand_idx]
         # process the epoch batch by batch
-        for i in range(0, (trainY.shape[0]//BATCH_SIZE)):
+        for i in range(0, (trainY.shape[1]//batch)):
             # initialize the starting and ending index of the current batch
-            start_idx = i*BATCH_SIZE
-            end_idx = start_idx+BATCH_SIZE
-            batchX = randX[start_idx:end_idx,:]
-            batchY = randY[start_idx:end_idx,:]
+            start_idx = i*batch
+            end_idx = start_idx+batch
+            batchX = randX[:,start_idx:end_idx]
+            batchY = randY[:,start_idx:end_idx]
             # compute the gradient and update the weights based on the current batch
-            grad = w * ALPHA + gradCE(batchX, batchY, w) * (1 - ALPHA)
-            w -= LEARNING_RATE * grad
+            w -= learn_rate * gradCE(batchX, batchY, w)
 
 
     if test:
@@ -221,17 +270,26 @@ if __name__ == "__main__":
     w = pack(W1, b1, W2, b2)
 
     # Check that the gradient is correct on just a few examples (randomly drawn).
-    # idxs = np.random.permutation(trainX.shape[0])[0:NUM_CHECK]
-    # print("Numerical gradient:")
-    # print(scipy.optimize.approx_fprime(w, lambda w_: fCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_)[0], 1e-10))
-    # print("Analytical gradient:")
-    # print(gradCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w))
-    # print("Discrepancy:")
-    # print(scipy.optimize.check_grad(lambda w_: fCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_)[0], \
-    #                                 lambda w_: gradCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_), \
-    #                                 w))
+    idxs = np.random.permutation(trainX.shape[0])[0:NUM_CHECK]
+    print("Numerical gradient:")
+    print(scipy.optimize.approx_fprime(w, lambda w_: fCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_)[0], 1e-10))
+    print("Analytical gradient:")
+    print(gradCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w))
+    print("Discrepancy:")
+    print(scipy.optimize.check_grad(lambda w_: fCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_)[0], \
+                                    lambda w_: gradCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_), \
+                                    w))
 
     # # # # Train the network using SGD.
-    e,b,l,a = findBestHyperparameters(trainX, trainY, testX, testY, w)
-    # e,b,l,a = 100, 64, 0.001, 0.01
-    train(trainX, trainY, testX, testY, w, e, b, l, a, test=True)
+    # NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA = findBestHyperparameters(trainX, trainY, testX, testY, w)
+
+    # # Initialize weights randomly
+    # W1 = 2*(np.random.random(size=(NUM_HIDDEN, NUM_INPUT))/NUM_INPUT**0.5) - 1./NUM_INPUT**0.5
+    # b1 = 0.01 * np.ones(NUM_HIDDEN)
+    # W2 = 2*(np.random.random(size=(NUM_OUTPUT, NUM_HIDDEN))/NUM_HIDDEN**0.5) - 1./NUM_HIDDEN**0.5
+    # b2 = 0.01 * np.ones(NUM_OUTPUT)
+
+    # # Concatenate all the weights and biases into one vector; this is necessary for check_grad
+    # w = pack(W1, b1, W2, b2)
+
+    train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=True)
