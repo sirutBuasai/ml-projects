@@ -151,17 +151,17 @@ def visualize(x):
 def findBestHyperparameters(trainX, trainY, testX, testY, w):
     epochTrain = [10, 20, 30, 40, 50, 75, 100]
     batchSizeTrain = [16, 32, 64, 128, 256]
-    learningRateTrain = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5]
-    alphaTrain = [0.1]
+    learningRateTrain = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05]
+    alphaTrain = [0.001]
 
-    optimal = {'Epoch': 0, 'Batch': 0, 'learnRate': 0.0, 'Cost': 8.0, 'Accuracy': 0.0, 'Alpha': 3e-3}
+    optimal = {'Epoch': 0, 'Batch': 0, 'learnRate': 0.0, 'Cost': float('inf'), 'Accuracy': 0.0, 'Alpha': 1e-3}
 
     for x in range(1,10):
         epochs = random.choice(epochTrain)
         learn_rate = random.choice(learningRateTrain)
         batch = random.choice(batchSizeTrain)
         alpha = random.choice(alphaTrain)
-        cost, acc = train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha)
+        cost, acc = train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha, test=False)
         print("Hyper Parameters in run ",x, "\nEpochs: ", epochs, "\nLearning Rate: ", learn_rate, "\nBatch Size: ", batch)
 
         if cost < optimal.get('Cost') and acc > optimal.get('Accuracy'):
@@ -173,7 +173,7 @@ def findBestHyperparameters(trainX, trainY, testX, testY, w):
 
 # Given training and testing datasets and an initial set of weights/biases b,
 # train the NN.
-def train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha):
+def train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha, test=False):
     EPOCH = epochs
     BATCH_SIZE = batch
     LEARNING_RATE = learn_rate
@@ -197,7 +197,10 @@ def train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha):
             w -= LEARNING_RATE * grad
 
 
-    cost, acc, _, _, _, _, _ = fCE(trainX, trainY, w, alpha)
+    if test:
+        cost, acc, _, _, _, _, _ = fCE(testX, testY, w, alpha)
+    else:
+        cost, acc, _, _, _, _, _ = fCE(trainX, trainY, w, alpha)
     print("Cost:", cost)
     print("Accuracy:", acc)
     return cost, acc
@@ -229,6 +232,6 @@ if __name__ == "__main__":
     #                                 w))
 
     # # # # Train the network using SGD.
-    # e,b,l,a = findBestHyperparameters(trainX, trainY, testX, testY, w)
-    e,b,l,a = 100, 50, 0.001, 0.01
-    train(trainX, trainY, testX, testY, w, e, b, l, a)
+    e,b,l,a = findBestHyperparameters(trainX, trainY, testX, testY, w)
+    # e,b,l,a = 100, 64, 0.001, 0.01
+    train(trainX, trainY, testX, testY, w, e, b, l, a, test=True)
