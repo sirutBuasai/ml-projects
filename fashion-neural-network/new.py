@@ -55,9 +55,9 @@ def loadData(which):
 def fCE(X, Y, w, alpha=0., show=False): #CHECK
     W1, b1, W2, b2 = unpack(w)
     # get z1,h1,yhat from forward propagation
-    z1, h1, z2, yhat = forwardProp(X, w)
+    z1, h1, z2, yhat = forwardProp(X.T, w)
     if show:
-        print(yhat.T)
+        print(yhat)
         print(Y)
         print(np.array([np.argmax(i) for i in yhat.T]))
         print(np.array([np.argmax(j) for j in Y]))
@@ -74,7 +74,7 @@ def fCE(X, Y, w, alpha=0., show=False): #CHECK
 # will also need to modify slightly the gradient check code below).
 def gradCE(X, Y, w, alpha=0.): #CHECK
     W1, b1, W2, b2 = unpack(w)
-    z1, h1, z2, yhat = forwardProp(X, w)
+    z1, h1, z2, yhat = forwardProp(X.T, w)
 
     db2 = np.mean(yhat.T - Y, axis=0)
     dW2 = np.atleast_2d(yhat.T - Y).T.dot(h1).T
@@ -135,9 +135,9 @@ def softMax(z): #CHECK
 def forwardProp(X, w): #CHECK
     W1, b1, W2, b2 = unpack(w)
 
-    z1 = X.dot(W1.T) + b1
+    z1 = W1.dot(X) + b1[:,None]
     h1 = ReLU(z1)
-    z2 = h1.dot(W2.T) + b2
+    z2 = W2.dot(h1) + b2[:,None]
     yhat = softMax(z2)
 
     return z1, h1, z2, yhat
