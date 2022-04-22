@@ -1,11 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize
-import random
 
-EPOCH = 30  # Number of epochs
-BATCH_SIZE = 64  # Size of SGD batch
-LEARNING_RATE = 0.001   # Gradient descent rate
+EPOCH = 10  # Number of epochs
+BATCH_SIZE = 16  # Size of SGD batch
+LEARNING_RATE = 0.05   # Gradient descent rate
 ALPHA = 0.001   # Regularization strength
 NUM_INPUT = 784  # Number of input neurons
 NUM_HIDDEN = 40  # Number of hidden neurons
@@ -143,11 +142,28 @@ def forwardProp(X, w):
 
     return z1, h1, z2, yhat
 
+# Randomly initiialize weights helper
+# ----------------------------------------------------
+# Argument: void
+# Return: w
+def initWeights():
+    # randomly initialize the weights
+    W1 = 2*(np.random.random(size=(NUM_HIDDEN, NUM_INPUT))/NUM_INPUT**0.5) - 1./NUM_INPUT**0.5
+    b1 = 0.01 * np.ones(NUM_HIDDEN)
+    W2 = 2*(np.random.random(size=(NUM_OUTPUT, NUM_HIDDEN))/NUM_HIDDEN**0.5) - 1./NUM_HIDDEN**0.5
+    b2 = 0.01 * np.ones(NUM_OUTPUT)
+    w = pack(W1, b1, W2, b2)
+
+    return w
+
 # Find the best hyper parameters using the validation set
 # ----------------------------------------------------
 # Argument: x
 # Return: void
-def findBestHyperparameters(trainX, trainY, testX, testY, w):
+def findBestHyperparameters(trainX, trainY, testX, testY, count):
+    # set global variables
+    global NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA
+
     # initialize the possible hyperparameters
     hidden_layer_list = np.array([30, 40, 50])
     batch_list = np.array([16, 32, 64, 128, 256])
@@ -165,7 +181,7 @@ def findBestHyperparameters(trainX, trainY, testX, testY, w):
         'accuracy': 0.0
     }
 
-    for i in range(10):
+    for i in range(count):
         # randomly choose a set of hyperparameters
         NUM_HIDDEN = np.random.choice(hidden_layer_list)
         BATCH_SIZE = np.random.choice(batch_list)
@@ -181,14 +197,15 @@ def findBestHyperparameters(trainX, trainY, testX, testY, w):
         w = pack(W1, b1, W2, b2)
 
         # train the model using given hyperparameters
-        print("Run ", i)
+        print("Run number", i+1)
         print("Training hyperparameters:")
-        print("Hidden layers: ", NUM_HIDDEN)
-        print("Batch size: ", BATCH_SIZE)
-        print("Learning rate: ", LEARNING_RATE)
-        print("Epoch: ", EPOCH)
-        print("Regularization strength: ", ALPHA)
+        print("Hidden layers:", NUM_HIDDEN)
+        print("Batch size:", BATCH_SIZE)
+        print("Learning rate:", LEARNING_RATE)
+        print("Epoch:", EPOCH)
+        print("Regularization strength:", ALPHA)
         cost, acc = train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=False)
+        print("----------------------------------")
 
         # update the optimal hyperparameters if the cost is lower and the accuracy is higher
         if (cost < best_hp['cost']) and (acc > best_hp['accuracy']):
@@ -221,7 +238,11 @@ def train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha, tes
             batchX = randX[:,start_idx:end_idx]
             batchY = randY[:,start_idx:end_idx]
             # compute the gradient and update the weights based on the current batch
-            w -= learn_rate * gradCE(batchX, batchY, w, ALPHA)
+            w -= learn_rate * gradCE(batchX, batchY, w, alpha)
+        # print epoch and losses
+        if test and (epochs - e <= 20):
+            cost, acc, _, _, _, _, _ = fCE(testX, testY, w, alpha)
+            print("Epoch:", e+1, "Cost:", cost, "Accuracy:", acc)
 
 
     if test:
@@ -238,14 +259,11 @@ if __name__ == "__main__":
         trainX, trainY = loadData("train")
         testX, testY = loadData("test")
 
-    # Initialize weights randomly
-    W1 = 2*(np.random.random(size=(NUM_HIDDEN, NUM_INPUT))/NUM_INPUT**0.5) - 1./NUM_INPUT**0.5
-    b1 = 0.01 * np.ones(NUM_HIDDEN)
-    W2 = 2*(np.random.random(size=(NUM_OUTPUT, NUM_HIDDEN))/NUM_HIDDEN**0.5) - 1./NUM_HIDDEN**0.5
-    b2 = 0.01 * np.ones(NUM_OUTPUT)
+    # Find the best hyper parameters
+    NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA = findBestHyperparameters(trainX, trainY, testX, testY, 20)
 
-    # Concatenate all the weights and biases into one vector; this is necessary for check_grad
-    w = pack(W1, b1, W2, b2)
+    # Initialize weights randomly
+    w = initWeights()
 
     # Check that the gradient is correct on just a few examples (randomly drawn).
     idxs = np.random.permutation(trainX.shape[0])[0:NUM_CHECK]
@@ -259,16 +277,4 @@ if __name__ == "__main__":
                                     w))
 
     # # # # Train the network using SGD.
-    NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA = findBestHyperparameters(trainX, trainY, testX, testY, w)
-
-    print(NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA)
-    # # Initialize weights randomly
-    # W1 = 2*(np.random.random(size=(NUM_HIDDEN, NUM_INPUT))/NUM_INPUT**0.5) - 1./NUM_INPUT**0.5
-    # b1 = 0.01 * np.ones(NUM_HIDDEN)
-    # W2 = 2*(np.random.random(size=(NUM_OUTPUT, NUM_HIDDEN))/NUM_HIDDEN**0.5) - 1./NUM_HIDDEN**0.5
-    # b2 = 0.01 * np.ones(NUM_OUTPUT)
-
-    # # Concatenate all the weights and biases into one vector; this is necessary for check_grad
-    # w = pack(W1, b1, W2, b2)
-
-    # train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=True)
+    train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=True)
