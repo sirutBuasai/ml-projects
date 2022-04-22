@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize
 
-EPOCH = 10  # Number of epochs
-BATCH_SIZE = 16  # Size of SGD batch
-LEARNING_RATE = 0.05   # Gradient descent rate
+EPOCH = 25  # Number of epochs
+BATCH_SIZE = 32  # Size of SGD batch
+LEARNING_RATE = 0.1   # Gradient descent rate
 ALPHA = 0.001   # Regularization strength
 NUM_INPUT = 784  # Number of input neurons
-NUM_HIDDEN = 40  # Number of hidden neurons
+NUM_HIDDEN = 50  # Number of hidden neurons
 NUM_OUTPUT = 10  # Number of output neurons
 NUM_CHECK = 1  # Number of examples on which to check the gradient
 
@@ -228,8 +228,7 @@ def train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha, tes
     for e in range(epochs):
         # randomize the samples
         rand_idx = np.random.permutation(trainX.shape[1])
-        randX = trainX[:,rand_idx]
-        randY = trainY[:,rand_idx]
+        randX, randY = trainX[:,rand_idx], trainY[:,rand_idx]
         # process the epoch batch by batch
         for i in range(0, (trainY.shape[1]//batch)):
             # initialize the starting and ending index of the current batch
@@ -244,11 +243,13 @@ def train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha, tes
             cost, acc, _, _, _, _, _ = fCE(testX, testY, w, alpha)
             print("Epoch:", e+1, "Cost:", cost, "Accuracy:", acc)
 
-
     if test:
         cost, acc, _, _, _, _, _ = fCE(testX, testY, w, alpha)
+        print("Testing cost and accuracy:")
     else:
         cost, acc, _, _, _, _, _ = fCE(trainX, trainY, w, alpha)
+        print("Training cost and accuracy:")
+
     print("Cost:", cost)
     print("Accuracy:", acc)
     return cost, acc
@@ -259,8 +260,17 @@ if __name__ == "__main__":
         trainX, trainY = loadData("train")
         testX, testY = loadData("test")
 
-    # Find the best hyper parameters
-    NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA = findBestHyperparameters(trainX, trainY, testX, testY, 20)
+    # randomize the samples
+    rand_idx = np.random.permutation(trainX.shape[1])
+    randX, randY = trainX[:,rand_idx], trainY[:,rand_idx]
+
+    # separate validation set and training set
+    ratio = int(trainX.shape[1]*0.8)
+    validateX, validateY = trainX[:,ratio:], trainY[:,ratio:]
+    trainX, trainY = trainX[:,:ratio], trainY[:,:ratio]
+
+    # # # # Find the best hyper parameters
+    NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA = findBestHyperparameters(validateX, validateY, testX, testY, 10)
 
     # Initialize weights randomly
     w = initWeights()
@@ -276,5 +286,5 @@ if __name__ == "__main__":
                                     lambda w_: gradCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_, ALPHA), \
                                     w))
 
-    # # # # Train the network using SGD.
-    train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=True)
+    # # # # Train and test the network using SGD with optimized hyperparameters
+    train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, show=True, test=False)
