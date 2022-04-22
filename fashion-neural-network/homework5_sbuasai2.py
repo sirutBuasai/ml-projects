@@ -4,13 +4,13 @@ import scipy.optimize
 import random
 
 EPOCH = 30  # Number of epochs
-BATCH_SIZE = 16  # Size of SGD batch
+BATCH_SIZE = 64  # Size of SGD batch
 LEARNING_RATE = 0.001   # Gradient descent rate
 ALPHA = 0.001   # Regularization strength
 NUM_INPUT = 784  # Number of input neurons
 NUM_HIDDEN = 40  # Number of hidden neurons
 NUM_OUTPUT = 10  # Number of output neurons
-NUM_CHECK = 5  # Number of examples on which to check the gradient
+NUM_CHECK = 1  # Number of examples on which to check the gradient
 
 # Given a vector w containing all the weights and biased vectors, extract
 # and return the individual weights and biases W1, b1, W2, b2.
@@ -63,7 +63,9 @@ def fCE(X, Y, w, alpha=0.):
     # get percent correct accuracy
     acc = fPC(yhat.T, Y.T)
     # calculate regularlized fCE
-    cost = -1 * np.mean(np.sum(Y * np.log(yhat), axis=0))
+    reg = (alpha/2) * (np.sum(W1**2) + np.sum(W2**2))
+    main = -1 * np.mean(np.sum(Y * np.log(yhat), axis=0))
+    cost = main + reg
 
     return cost, acc, z1, h1, W1, W2, yhat
 
@@ -75,15 +77,15 @@ def gradCE(X, Y, w, alpha=0.):
     W1, b1, W2, b2 = unpack(w)
     z1, h1, z2, yhat = forwardProp(X, w)
 
-    db2 = np.mean(yhat - Y, axis=1) ## FIRST WARNING
-    dW2 = np.atleast_2d(yhat - Y).dot(h1)
-    g = ((yhat - Y).T.dot(W2) * ReLUPrime(z1)).T ## SECOND WARNING
-    db1 = np.mean(g, axis=1) ## SECOND ISH WARNING FROM LAST ONE
-    dW1 = np.atleast_2d(g).dot(X.T)
+    g = ((yhat - Y).T.dot(W2) * ReLUPrime(z1)).T
+    dW1 = (np.atleast_2d(g).dot(X.T) / X.shape[1]) + (alpha*W1)
+    db1 = np.mean(g, axis=1)
+    dW2 = (np.atleast_2d(yhat - Y).dot(h1) / X.shape[1]) + (alpha*W2)
+    db2 = np.mean(yhat - Y, axis=1)
 
     grad = pack(dW1, db1, dW2, db2)
 
-    return w * alpha + grad * (1 - alpha)
+    return grad
 
 #
 # Helper functions ########################################
@@ -201,30 +203,6 @@ def findBestHyperparameters(trainX, trainY, testX, testY, w):
     print(best_hp)
     return best_hp['hidden'], best_hp['batch'], best_hp['learn_rate'], best_hp['epoch'], best_hp['reg_str']
 
-
-# def findBestHyperparameters(trainX, trainY, testX, testY, w):
-#     epochTrain = [10, 20, 30, 40, 50, 75, 100]
-#     batchSizeTrain = [16, 32, 64, 128, 256]
-#     learningRateTrain = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5]
-#     alphaTrain = [0.001]
-
-#     optimal = {'Epoch': 0, 'Batch': 0, 'learnRate': 0.0, 'Cost': float('inf'), 'Accuracy': 0.0, 'Alpha': 1e-3}
-
-#     for x in range(1,10):
-#         epochs = random.choice(epochTrain)
-#         learn_rate = random.choice(learningRateTrain)
-#         batch = random.choice(batchSizeTrain)
-#         alpha = random.choice(alphaTrain)
-#         cost, acc = train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha, test=False)
-#         print("Hyper Parameters in run ",x, "\nEpochs: ", epochs, "\nLearning Rate: ", learn_rate, "\nBatch Size: ", batch)
-
-#         if cost < optimal.get('Cost') and acc > optimal.get('Accuracy'):
-#             optimal.update(Epoch = epochs, Batch = batch, learnRate = learn_rate, Cost = cost, Accuracy = acc)
-
-#     print(optimal)
-
-#     return optimal.get('Epoch'), optimal.get('Batch'), optimal.get('learnRate'), optimal.get('Alpha')
-
 # Given training and testing datasets and an initial set of weights/biases b,
 # train the NN.
 def train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha, test=False):
@@ -243,7 +221,7 @@ def train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha, tes
             batchX = randX[:,start_idx:end_idx]
             batchY = randY[:,start_idx:end_idx]
             # compute the gradient and update the weights based on the current batch
-            w -= learn_rate * gradCE(batchX, batchY, w)
+            w -= learn_rate * gradCE(batchX, batchY, w, ALPHA)
 
 
     if test:
@@ -272,17 +250,18 @@ if __name__ == "__main__":
     # Check that the gradient is correct on just a few examples (randomly drawn).
     idxs = np.random.permutation(trainX.shape[0])[0:NUM_CHECK]
     print("Numerical gradient:")
-    print(scipy.optimize.approx_fprime(w, lambda w_: fCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_)[0], 1e-10))
+    print(scipy.optimize.approx_fprime(w, lambda w_: fCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_, ALPHA)[0], 1e-10))
     print("Analytical gradient:")
-    print(gradCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w))
+    print(gradCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w, ALPHA))
     print("Discrepancy:")
-    print(scipy.optimize.check_grad(lambda w_: fCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_)[0], \
-                                    lambda w_: gradCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_), \
+    print(scipy.optimize.check_grad(lambda w_: fCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_, ALPHA)[0], \
+                                    lambda w_: gradCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_, ALPHA), \
                                     w))
 
     # # # # Train the network using SGD.
-    # NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA = findBestHyperparameters(trainX, trainY, testX, testY, w)
+    NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA = findBestHyperparameters(trainX, trainY, testX, testY, w)
 
+    print(NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA)
     # # Initialize weights randomly
     # W1 = 2*(np.random.random(size=(NUM_HIDDEN, NUM_INPUT))/NUM_INPUT**0.5) - 1./NUM_INPUT**0.5
     # b1 = 0.01 * np.ones(NUM_HIDDEN)
@@ -292,4 +271,4 @@ if __name__ == "__main__":
     # # Concatenate all the weights and biases into one vector; this is necessary for check_grad
     # w = pack(W1, b1, W2, b2)
 
-    train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=True)
+    # train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=True)
