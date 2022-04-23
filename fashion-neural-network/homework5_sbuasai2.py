@@ -75,9 +75,9 @@ def gradCE(X, Y, w, alpha=0.):
     # get z1,h1,z2,yhat from forward propagation
     z1, h1, z2, yhat = forwardProp(X, w)
     # calculate the gradient of each term with respect to f
-    dW2 = (np.atleast_2d(yhat - Y).dot(h1) / X.shape[1]) + (alpha*W2)
+    dW2 = (np.atleast_2d(yhat - Y).dot(h1.T) / X.shape[1]) + (alpha*W2)
     db2 = np.mean(yhat - Y, axis=1)
-    g = ((yhat - Y).T.dot(W2) * ReLUPrime(z1)).T
+    g = ((yhat - Y).T.dot(W2) * ReLUPrime(z1.T)).T
     dW1 = (np.atleast_2d(g).dot(X.T) / X.shape[1]) + (alpha*W1)
     db1 = np.mean(g, axis=1)
     # pack the gradient term back to the format of vector w
@@ -136,9 +136,9 @@ def softMax(z):
 def forwardProp(X, w):
     W1, b1, W2, b2 = unpack(w)
     # computer each layer of the network according to the network descriptions
-    z1 = W1.dot(X).T + b1
+    z1 = (W1.dot(X).T + b1).T
     h1 = ReLU(z1)
-    z2 = W2.dot(h1.T).T + b2
+    z2 = W2.dot(h1).T + b2
     yhat = softMax(z2)
 
     return z1, h1, z2, yhat
@@ -265,7 +265,7 @@ if __name__ == "__main__":
     trainX, trainY = trainX[:,:ratio], trainY[:,:ratio]
 
     # # # # Find the best hyper parameters
-    NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA = findBestHyperparameters(validateX, validateY, testX, testY, 10)
+    # NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA = findBestHyperparameters(validateX, validateY, testX, testY, 10)
 
     # Initialize weights randomly
     w = initWeights()
@@ -282,4 +282,4 @@ if __name__ == "__main__":
                                     w))
 
     # # # # Train and test the network using SGD with optimized hyperparameters
-    train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=True)
+    # train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=True)
