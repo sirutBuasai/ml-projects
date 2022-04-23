@@ -14,8 +14,6 @@ NUM_CHECK = 1  # Number of examples on which to check the gradient
 # Given a vector w containing all the weights and biased vectors, extract
 # and return the individual weights and biases W1, b1, W2, b2.
 # This is useful for performing a gradient check with check_grad.
-
-
 def unpack(w):
     # Unpack arguments
     start = 0
@@ -57,7 +55,7 @@ def loadData(which):
 # as well as the intermediate values of the NN.
 def fCE(X, Y, w, alpha=0.):
     W1, b1, W2, b2 = unpack(w)
-    # get z1,h1,yhat from forward propagation
+    # get z1,h1,z2,yhat from forward propagation
     z1, h1, z2, yhat = forwardProp(X, w)
     # get percent correct accuracy
     acc = fPC(yhat.T, Y.T)
@@ -74,14 +72,15 @@ def fCE(X, Y, w, alpha=0.):
 # will also need to modify slightly the gradient check code below).
 def gradCE(X, Y, w, alpha=0.):
     W1, b1, W2, b2 = unpack(w)
+    # get z1,h1,z2,yhat from forward propagation
     z1, h1, z2, yhat = forwardProp(X, w)
-
+    # calculate the gradient of each term with respect to f
     g = ((yhat - Y).T.dot(W2) * ReLUPrime(z1)).T
     dW1 = (np.atleast_2d(g).dot(X.T) / X.shape[1]) + (alpha*W1)
     db1 = np.mean(g, axis=1)
     dW2 = (np.atleast_2d(yhat - Y).dot(h1) / X.shape[1]) + (alpha*W2)
     db2 = np.mean(yhat - Y, axis=1)
-
+    # pack the gradient term back to the format of vector w
     grad = pack(dW1, db1, dW2, db2)
 
     return grad
@@ -96,7 +95,7 @@ def ReLU(z):
     z[z <= 0] = 0
     return z
 
-# ReLUPrime: given an array z, return the derivative of z
+# ReLUPrime: given an array z, return the derivative of of ReLU(z)
 # ---------------------------------------------------------
 # Argument: z
 # Return: z
@@ -105,8 +104,7 @@ def ReLUPrime(z):
     z[z > 0] = 1
     return z
 
-# Percent correct function: given Xtilde, Wtilde, calculate yhat
-# and return percent correct wrt to y
+# Percent correct function: given yhat and y, get the percent correct
 # ----------------------------------------------------
 # Argument: yhat, y
 # Return: fPC
@@ -123,9 +121,12 @@ def fPC(guess, ground_truth):
 # Argument: z
 # Return: yhat
 def softMax(z):
+    # the numerator is the exp(z)
     num = np.exp(z).T
+    # the denominator is the sum_class(exp(z))
     denom = np.atleast_2d(np.exp(z)).sum(axis=1)
     yhat = num / denom
+
     return yhat
 
 # Forward propagation helper funciton to z1, h1, z2, yhat
@@ -134,7 +135,7 @@ def softMax(z):
 # Return: z1, h1, z2, yhat
 def forwardProp(X, w):
     W1, b1, W2, b2 = unpack(w)
-
+    # computer each layer of the network according to the network descriptions
     z1 = W1.dot(X).T + b1
     h1 = ReLU(z1)
     z2 = W2.dot(h1.T).T + b2
@@ -158,12 +159,11 @@ def initWeights():
 
 # Find the best hyper parameters using the validation set
 # ----------------------------------------------------
-# Argument: x
-# Return: void
+# Argument: trainX, trainY, testX, testY, count
+# Return: NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA
 def findBestHyperparameters(trainX, trainY, testX, testY, count):
     # set global variables
     global NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA
-
     # initialize the possible hyperparameters
     hidden_layer_list = np.array([30, 40, 50])
     batch_list = np.array([16, 32, 64, 128, 256])
@@ -188,14 +188,8 @@ def findBestHyperparameters(trainX, trainY, testX, testY, count):
         LEARNING_RATE = np.random.choice(learn_rate_list)
         EPOCH = np.random.choice(epoch_list)
         ALPHA = np.random.choice(reg_list)
-
         # randomly initialize the weights
-        W1 = 2*(np.random.random(size=(NUM_HIDDEN, NUM_INPUT))/NUM_INPUT**0.5) - 1./NUM_INPUT**0.5
-        b1 = 0.01 * np.ones(NUM_HIDDEN)
-        W2 = 2*(np.random.random(size=(NUM_OUTPUT, NUM_HIDDEN))/NUM_HIDDEN**0.5) - 1./NUM_HIDDEN**0.5
-        b2 = 0.01 * np.ones(NUM_OUTPUT)
-        w = pack(W1, b1, W2, b2)
-
+        w = initWeights()
         # train the model using given hyperparameters
         print("Run number", i+1)
         print("Training hyperparameters:")
@@ -225,6 +219,7 @@ def findBestHyperparameters(trainX, trainY, testX, testY, count):
 def train(trainX, trainY, testX, testY, w, epochs, batch, learn_rate, alpha, test=False):
     W1, b1, W2, b2 = unpack(w)
 
+    print("Epoch size:", epochs)
     for e in range(epochs):
         # randomize the samples
         rand_idx = np.random.permutation(trainX.shape[1])
@@ -287,4 +282,4 @@ if __name__ == "__main__":
                                     w))
 
     # # # # Train and test the network using SGD with optimized hyperparameters
-    train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, show=True, test=False)
+    train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=True)
