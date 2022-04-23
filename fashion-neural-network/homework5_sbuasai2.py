@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize
 
-EPOCH = 25  # Number of epochs
+EPOCH = 100  # Number of epochs
 BATCH_SIZE = 32  # Size of SGD batch
-LEARNING_RATE = 0.1   # Gradient descent rate
+LEARNING_RATE = 0.05   # Gradient descent rate
 ALPHA = 0.001   # Regularization strength
 NUM_INPUT = 784  # Number of input neurons
-NUM_HIDDEN = 50  # Number of hidden neurons
+NUM_HIDDEN = 30  # Number of hidden neurons
 NUM_OUTPUT = 10  # Number of output neurons
 NUM_CHECK = 5  # Number of examples on which to check the gradient
 
