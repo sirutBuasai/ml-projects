@@ -75,11 +75,11 @@ def gradCE(X, Y, w, alpha=0.):
     # get z1,h1,z2,yhat from forward propagation
     z1, h1, z2, yhat = forwardProp(X, w)
     # calculate the gradient of each term with respect to f
-    dW2 = (np.atleast_2d(yhat - Y).dot(h1.T) / X.shape[1]) + (alpha*W2)
-    db2 = np.mean(yhat - Y, axis=1)
     g = ((yhat - Y).T.dot(W2) * ReLUPrime(z1.T)).T
     dW1 = (np.atleast_2d(g).dot(X.T) / X.shape[1]) + (alpha*W1)
     db1 = np.mean(g, axis=1)
+    dW2 = (np.atleast_2d(yhat - Y).dot(h1.T) / X.shape[1]) + (alpha*W2)
+    db2 = np.mean(yhat - Y, axis=1)
     # pack the gradient term back to the format of vector w
     grad = pack(dW1, db1, dW2, db2)
 
@@ -92,17 +92,19 @@ def gradCE(X, Y, w, alpha=0.):
 # Argument: z
 # Return: z
 def ReLU(z):
-    z[z <= 0] = 0
-    return z
+    z_new = z.copy()
+    z_new[z_new <= 0] = 0
+    return z_new
 
 # ReLUPrime: given an array z, return the derivative of of ReLU(z)
 # ---------------------------------------------------------
 # Argument: z
 # Return: z
 def ReLUPrime(z):
-    z[z <= 0] = 0
-    z[z > 0] = 1
-    return z
+    z_new = z.copy()
+    z_new[z_new <= 0] = 0
+    z_new[z_new > 0] = 1
+    return z_new
 
 # Percent correct function: given yhat and y, get the percent correct
 # ----------------------------------------------------
@@ -282,4 +284,4 @@ if __name__ == "__main__":
                                     w))
 
     # # # # Train and test the network using SGD with optimized hyperparameters
-    # train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=True)
+    train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=True)
