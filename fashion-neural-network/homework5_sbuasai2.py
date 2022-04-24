@@ -266,9 +266,6 @@ if __name__ == "__main__":
     validateX, validateY = trainX[:,ratio:], trainY[:,ratio:]
     trainX, trainY = trainX[:,:ratio], trainY[:,:ratio]
 
-    # # # # Find the best hyper parameters
-    # NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA = findBestHyperparameters(validateX, validateY, testX, testY, 10)
-
     # Initialize weights randomly
     w = initWeights()
 
@@ -282,6 +279,12 @@ if __name__ == "__main__":
     print(scipy.optimize.check_grad(lambda w_: fCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_, ALPHA)[0], \
                                     lambda w_: gradCE(np.atleast_2d(trainX[:,idxs]), np.atleast_2d(trainY[:,idxs]), w_, ALPHA), \
                                     w))
+
+    # # # # Find the best hyper parameters
+    # NUM_HIDDEN, BATCH_SIZE, LEARNING_RATE, EPOCH, ALPHA = findBestHyperparameters(validateX, validateY, testX, testY, 10)
+
+    # Initialize weights randomly
+    w = initWeights()
 
     # # # # Train and test the network using SGD with optimized hyperparameters
     train(trainX, trainY, testX, testY, w, EPOCH, BATCH_SIZE, LEARNING_RATE, ALPHA, test=True)
