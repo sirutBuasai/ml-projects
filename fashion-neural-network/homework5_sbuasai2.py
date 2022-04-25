@@ -59,7 +59,7 @@ def fCE(X, Y, w, alpha=0.):
     z1, h1, z2, yhat = forwardProp(X, w)
     # get percent correct accuracy
     acc = fPC(yhat.T, Y.T)
-    # calculate regularlized fCE
+    # calculate regularized fCE
     reg = (alpha/2) * (np.sum(W1**2) + np.sum(W2**2))
     main = -1 * np.mean(np.sum(Y * np.log(yhat), axis=0))
     cost = main + reg
@@ -118,7 +118,7 @@ def fPC(guess, ground_truth):
 
     return np.mean(yhat == y)
 
-# SoftMax helper funciton to compute yhat
+# SoftMax helper function to compute yhat
 # ----------------------------------------------------
 # Argument: z
 # Return: yhat
@@ -131,7 +131,7 @@ def softMax(z):
 
     return yhat
 
-# Forward propagation helper funciton to z1, h1, z2, yhat
+# Forward propagation helper function to z1, h1, z2, yhat
 # ----------------------------------------------------
 # Argument: X, w
 # Return: z1, h1, z2, yhat
@@ -145,7 +145,7 @@ def forwardProp(X, w):
 
     return z1, h1, z2, yhat
 
-# Randomly initiialize weights helper
+# Randomly initialize weights helper
 # ----------------------------------------------------
 # Argument: void
 # Return: w
