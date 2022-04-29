@@ -1,3 +1,4 @@
 train/
 test/
 *.npy
+__pycache__/
