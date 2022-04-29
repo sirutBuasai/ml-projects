@@ -79,11 +79,14 @@ if __name__ == "__main__":
     trainX, validX = train_test_split(trainX, test_size=0.2, random_state=rand)
     trainY, validY = train_test_split(trainY, test_size=0.2, random_state=rand)
 
-    # cut id field out
+    # initialize fields that will be used in training
     numerical_data = ['bone_length',
                       'rotting_flesh',
                       'hair_length',
-                      'has_soul']
+                      'has_soul',
+                      'black', 'blood',
+                      'blue', 'clear',
+                      'green', 'white']
 
     # initialize neural network
     model = tf.keras.Sequential()
@@ -96,9 +99,12 @@ if __name__ == "__main__":
     model.compile(optimizer='Adam',
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
+    print(trainX[numerical_data].head())
+    print(trainY.head())
     model.fit(trainX[numerical_data], trainY, epochs=20)
 
     # use weights on testing set
+    print(testX[numerical_data].head())
     guess = model.predict(testX[numerical_data])
     predictions = decodeOHE(guess)
 
