@@ -4,7 +4,7 @@ from sklearn.neighbors import KNeighborsClassifier
 # internal libraries
 from parsing import *
 
-# Train and thest the data using k-nearest neighbor
+# Train and test the data using k-nearest neighbor
 def kNearestNeighbor(trainX, trainY, testX):
     # hyperparameters
     NUM_NEIGHBOR = 7
