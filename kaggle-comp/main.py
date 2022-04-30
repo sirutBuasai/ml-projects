@@ -1,9 +1,12 @@
+# external libraries
 import pandas as pd
 import numpy as np
 import tensorflow as tf
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
+
 
 # Decode one hot matrix into monster type
 def decodeOHE(guess):
@@ -14,7 +17,7 @@ def decodeOHE(guess):
 
     return decoded
 
-# Clean the data into a data fram with only numerical fields
+# Clean the data into a data frame with only numerical fields
 def cleanData(data_frame):
     # extract existing numerical data
     data = {'id': data_frame.id,
@@ -63,6 +66,74 @@ def loadTest(name):
 
     return testX
 
+# Train and thest the data using k-nearest neighbor
+def kNearestNeighbor(trainX, trainY, testX):
+    # hyperparameters
+    NUM_NEIGHBOR = 7
+
+    # train the model using k-nearest neighbor
+    model = KNeighborsClassifier(n_neighbors = NUM_NEIGHBOR).fit(trainX, trainY)
+
+    # use weights on testing set
+    guess = model.predict(testX)
+    predictions = decodeOHE(guess)
+
+    return predictions
+
+# Train and test the data using 3-layers neural network
+# TODO: add validation on hyperparameters
+def threeLayerNN(trainX, trainY, validX, vliadY, testX):
+    # hyperparameters
+    EPOCH = 20
+    LEARN_RATE = 0.001
+    NUM_HIDDEN = 50
+
+    # initialize neural network
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Dense(NUM_HIDDEN, activation=tf.nn.relu, name="layer1"))
+    model.add(tf.keras.layers.Dense(3, activation=tf.nn.softmax, name="layer2"))
+
+    # train the neural network
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE),
+                  loss=tf.keras.losses.CategoricalCrossentropy(),
+                  metrics=[tf.keras.metrics.CategoricalAccuracy()])
+    model.fit(trainX, trainY, epochs=EPOCH)
+
+    # use weights on testing set
+    guess = model.predict(testX)
+    predictions = decodeOHE(guess)
+
+    return predictions
+
+# Train and test the data using deep neural network
+# TODO: add validation on hyperparameters
+def deepNN(trainX, trainY, validX, vliadY, testX):
+    # hyperparameters
+    EPOCH = 20
+    LEARN_RATE = 0.001
+    NUM_HIDDEN1 = 50
+    NUM_HIDDEN2 = 50
+    NUM_HIDDEN3 = 50
+
+    # initialize neural network
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Dense(NUM_HIDDEN1, activation=tf.nn.relu, name="layer1"))
+    model.add(tf.keras.layers.Dense(NUM_HIDDEN2, activation=tf.nn.relu, name="layer2"))
+    model.add(tf.keras.layers.Dense(NUM_HIDDEN3, activation=tf.nn.relu, name="layer3"))
+    model.add(tf.keras.layers.Dense(3, activation=tf.nn.softmax, name="layer4"))
+
+    # train the neural network
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE),
+                  loss=tf.keras.losses.CategoricalCrossentropy(),
+                  metrics=[tf.keras.metrics.CategoricalAccuracy()])
+    model.fit(trainX, trainY, epochs=EPOCH)
+
+    # use weights on testing set
+    guess = model.predict(testX)
+    predictions = decodeOHE(guess)
+
+    return predictions
+
 if __name__ == "__main__":
     # read data
     trainX, trainY = loadTrain("train")
@@ -80,35 +151,22 @@ if __name__ == "__main__":
     trainY, validY = train_test_split(trainY, test_size=0.2, random_state=rand)
 
     # initialize fields that will be used in training
-    numerical_data = ['bone_length',
-                      'rotting_flesh',
-                      'hair_length',
-                      'has_soul',
-                      'black', 'blood',
-                      'blue', 'clear',
-                      'green', 'white']
+    features = ['bone_length',
+                'rotting_flesh',
+                'hair_length',
+                'has_soul',
+                'black', 'blood',
+                'blue', 'clear',
+                'green', 'white']
 
-    # initialize neural network
-    model = tf.keras.Sequential()
-    model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu, name="layer1"))
-    model.add(tf.keras.layers.Dense(512, activation=tf.nn.relu, name="layer2"))
-    model.add(tf.keras.layers.Dense(64, activation=tf.nn.relu, name="layer3"))
-    model.add(tf.keras.layers.Dense(3, activation=tf.nn.softmax, name="layer4"))
-
-    # train the neural network
-    model.compile(optimizer='Adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
-    print(trainX[numerical_data].head())
-    print(trainY.head())
-    model.fit(trainX[numerical_data], trainY, epochs=20)
-
-    # use weights on testing set
-    print(testX[numerical_data].head())
-    guess = model.predict(testX[numerical_data])
-    predictions = decodeOHE(guess)
+    # k-nearest neighbors
+    prediction0 = kNearestNeighbor(trainX[features], trainY, testX[features])
+    # 3-layers neural network
+    # prediction1 = threeLayerNN(trainX[features], trainY, validX[features], validY, testX[features])
+    # deep neural network
+    # prediction2 = deepNN(trainX[features], trainY, validX[features], validY, testX[features])
 
     # construct output data frame and export to csv
-    output = {'id': testX.id, 'type': predictions}
-    res = pd.DataFrame(output)
-    res.to_csv("guess.csv", index=False)
+    output = {'id': testX.id, 'type': prediction0}
+    result = pd.DataFrame(output)
+    result.to_csv("guess.csv", index=False)
