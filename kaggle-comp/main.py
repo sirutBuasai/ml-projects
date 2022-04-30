@@ -72,7 +72,8 @@ def kNearestNeighbor(trainX, trainY, testX):
     NUM_NEIGHBOR = 7
 
     # train the model using k-nearest neighbor
-    model = KNeighborsClassifier(n_neighbors = NUM_NEIGHBOR).fit(trainX, trainY)
+    model = KNeighborsClassifier(n_neighbors=NUM_NEIGHBOR)
+    model.fit(trainX, trainY)
 
     # use weights on testing set
     guess = model.predict(testX)
