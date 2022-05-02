@@ -1,5 +1,4 @@
 # external libraries
-import pandas as pd
 import numpy as np
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
@@ -32,14 +31,17 @@ if __name__ == "__main__":
                 'blue', 'clear',
                 'green', 'white']
 
+    # random guess
+    prediction0 = randomGuess(testX[features])
     # k-nearest neighbors
-    prediction0 = kNearestNeighbor(trainX[features], trainY, testX[features])
+    prediction1 = kNearestNeighbor(trainX[features], trainY, testX[features])
     # 3-layers neural network
-    # prediction1 = threeLayerNN(trainX[features], trainY, validX[features], validY, testX[features])
+    prediction2 = threeLayerNN(trainX[features], trainY, validX[features], validY, testX[features])
     # deep neural network
-    # prediction2 = deepNN(trainX[features], trainY, validX[features], validY, testX[features])
+    prediction3 = deepNN(trainX[features], trainY, validX[features], validY, testX[features])
 
     # construct output data frame and export to csv
-    output = {'id': testX.id, 'type': prediction0}
-    result = pd.DataFrame(output)
-    result.to_csv("guess.csv", index=False)
+    output(testX, prediction0, "randGuess")
+    output(testX, prediction1, "kNearN")
+    output(testX, prediction2, "3layerNN")
+    output(testX, prediction3, "deepNN")

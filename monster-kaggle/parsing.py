@@ -32,7 +32,7 @@ def cleanData(data_frame):
     return cleaned
 
 # Convert monster category into a categorical value.
-# 0 = Ghost, 1 = Ghoul, 2 = Goblin
+# idx 0 = Ghost, 1 = Ghoul, 2 = Goblin
 def categorizeGroundtruth(data_frame):
     # create output data frame
     output = pd.DataFrame()
@@ -60,3 +60,9 @@ def loadTest(name):
     testX = cleanData(df)
 
     return testX
+
+# Take a result prediction and output as csv
+def output(testX, prediction, file_name):
+    output = {'id': testX.id, 'type': prediction}
+    result = pd.DataFrame(output)
+    result.to_csv(file_name + ".csv", index=False)
