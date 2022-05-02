@@ -42,7 +42,7 @@ def categorizeGroundtruth(data_frame):
     oh_type = ohe.fit_transform(data_frame[['type']])
     # attach the one hot matrix back to data frame
     output[ohe.categories_[0]] = oh_type.toarray()
-    
+
     return output
 
 # Load training data. This function will return both X and Y
