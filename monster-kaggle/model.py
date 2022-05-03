@@ -1,12 +1,11 @@
 # external libraries
 import numpy as np
 import tensorflow as tf
+from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 # internal libraries
 from parsing import *
-
-from sklearn.model_selection import GridSearchCV
 
 # Guess the data randomly
 def randomGuess(trainX, trainY, testX):
@@ -36,7 +35,7 @@ def kNearestNeighbor(trainX, trainY, testX):
 
     return predictions
 
-def kNearestNeighborTuned(trainX, trainY, testX):
+def optimizeKNN(trainX, trainY, testX):
 
     # Doing another model with hyperparameter tuning
     model = KNeighborsClassifier(algorithm='auto')
@@ -63,11 +62,7 @@ def kNearestNeighborTuned(trainX, trainY, testX):
 
 
 # Train and test the data using 3-layers neural network
-<<<<<<< HEAD
 def threeLayerNN(trainX, trainY, testX):
-=======
-def threeLayerNN(trainX, trainY, validX, validY, testX):
->>>>>>> de693ceac8f90b5aebe4935c17fe72faf6fb5b81
     # hyperparameters
     EPOCH = 100
     BATCH_SIZE = 64
@@ -91,7 +86,7 @@ def threeLayerNN(trainX, trainY, validX, validY, testX):
 
     return predictions
 
-def threeLayerNNTuned(trainX, trainY, validX, validY, testX):
+def optimize3NN(trainX, trainY, validX, validY, testX):
     EPOCHS = np.array([25, 50, 100])
     BATCH_SIZES = np.array([16, 32, 64, 128])
     # NUM_HIDDENS = np.array([30, 40, 50])
@@ -110,7 +105,7 @@ def threeLayerNNTuned(trainX, trainY, validX, validY, testX):
     # Constant for number of hyperparameter combos tested
     COUNT = 20
 
-    for i in range(COUNT):
+    for _ in range(COUNT):
         # randomly choose a set of hyperparameters
         NUM_HIDDEN = np.random.choice(NUM_HIDDENS)
         BATCH_SIZE = np.random.choice(BATCH_SIZES)
@@ -167,14 +162,8 @@ def threeLayerNNTuned(trainX, trainY, validX, validY, testX):
 
     return predictions
 
-
-
 # Train and test the data using deep neural network
-<<<<<<< HEAD
 def deepNN(trainX, trainY, testX):
-=======
-def deepNN(trainX, trainY, validX, validY, testX):
->>>>>>> de693ceac8f90b5aebe4935c17fe72faf6fb5b81
     # hyperparameters
     EPOCH = 100
     BATCH_SIZE = 64
@@ -190,8 +179,7 @@ def deepNN(trainX, trainY, validX, validY, testX):
     model.add(tf.keras.layers.Dense(NUM_HIDDEN2, activation=tf.nn.relu, name="hidden2"))
     model.add(tf.keras.layers.Dropout(rate=ALPHA))
     model.add(tf.keras.layers.Dense(NUM_HIDDEN3, activation=tf.nn.relu, name="hidden3"))
-    model.add(tf.keras.layers.Dense(NUM_HIDDEN3, activation=tf.nn.relu, name="hidden4"))
-    model.add(tf.keras.layers.Dense(3, activation=tf.nn.softmax, name="hidden5"))
+    model.add(tf.keras.layers.Dense(3, activation=tf.nn.softmax, name="output"))
 
     # train the neural network
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE),
@@ -205,7 +193,7 @@ def deepNN(trainX, trainY, validX, validY, testX):
 
     return predictions
 
-def deepNNTuned(trainX, trainY, validX, validY, testX):
+def optimizeDNN(trainX, trainY, validX, validY, testX):
     EPOCHS = np.array([25, 50, 100])
     BATCH_SIZES = np.array([16, 32, 64, 128])
     # NUM_HIDDENS1 = np.array([40, 50, 60])
@@ -231,7 +219,7 @@ def deepNNTuned(trainX, trainY, validX, validY, testX):
     # Constant for number of hyperparameter combos tested
     COUNT = 20
 
-    for i in range(COUNT):
+    for _ in range(COUNT):
         # randomly choose a set of hyperparameters
         NUM_HIDDEN1 = np.random.choice(NUM_HIDDENS1)
         NUM_HIDDEN2 = np.random.choice(NUM_HIDDENS2)
@@ -253,8 +241,7 @@ def deepNNTuned(trainX, trainY, validX, validY, testX):
         model.add(tf.keras.layers.Dense(NUM_HIDDEN2, activation=tf.nn.relu, name="hidden2"))
         model.add(tf.keras.layers.Dropout(rate=ALPHA))
         model.add(tf.keras.layers.Dense(NUM_HIDDEN3, activation=tf.nn.relu, name="hidden3"))
-        model.add(tf.keras.layers.Dense(NUM_HIDDEN3, activation=tf.nn.relu, name="hidden4"))
-        model.add(tf.keras.layers.Dense(3, activation=tf.nn.softmax, name="hidden5"))
+        model.add(tf.keras.layers.Dense(3, activation=tf.nn.softmax, name="output"))
 
         # train the neural network
         model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARN_RATE),
@@ -299,4 +286,3 @@ def deepNNTuned(trainX, trainY, validX, validY, testX):
     predictions = decodeOHE(guess)
 
     return predictions
-

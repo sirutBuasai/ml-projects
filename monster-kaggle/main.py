@@ -38,19 +38,19 @@ if __name__ == "__main__":
     prediction0 = randomGuess(trainX[features], trainY, testX[features])
     # k-nearest neighbors
     prediction1 = kNearestNeighbor(trainX[features], trainY, testX[features])
-    prediction1B = kNearestNeighborTuned(trainX_knn[features], trainY_knn, testX[features])
+    prediction1B = optimizeKNN(trainX_knn[features], trainY_knn, testX[features])
     # 3-layers neural network
-    prediction2 = threeLayerNN(trainX[features], trainY, validX[features], validY, testX[features])
-    prediction2B = threeLayerNNTuned(trainX[features], trainY, validX[features], validY, testX[features])
+    prediction2 = threeLayerNN(trainX[features], trainY, testX[features])
+    prediction2B = optimize3NN(trainX[features], trainY, validX[features], validY, testX[features])
     # deep neural network
-    prediction3 = deepNN(trainX[features], trainY, validX[features], validY, testX[features])
-    prediction3B = deepNNTuned(trainX[features], trainY, validX[features], validY, testX[features])
+    prediction3 = deepNN(trainX[features], trainY, testX[features])
+    prediction3B = optimizeDNN(trainX[features], trainY, validX[features], validY, testX[features])
 
     # construct output data frame and export to csv
     output(testX, prediction0, "randGuess")
     output(testX, prediction1, "kNearN")
     output(testX, prediction1B, "kNearNtuned")
-    # output(testX, prediction2, "3layerNN")
-    # output(testX, prediction2B, "3layerNNtuned")
-    # output(testX, prediction3, "deepNN")
+    output(testX, prediction2, "3layerNN")
+    output(testX, prediction2B, "3layerNNtuned")
+    output(testX, prediction3, "deepNN")
     output(testX, prediction3B, "deepNNtuned")
