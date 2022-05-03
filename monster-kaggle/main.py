@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 # internal libraries
 from parsing import *
 from model import *
+from visual import *
 
 if __name__ == "__main__":
     # read data
@@ -54,3 +55,6 @@ if __name__ == "__main__":
     output(testX, prediction2B, "3layerNNtuned")
     output(testX, prediction3, "deepNN")
     output(testX, prediction3B, "deepNNtuned")
+
+    # visualization
+    visualize()
