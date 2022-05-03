@@ -17,6 +17,9 @@ if __name__ == "__main__":
     trainY = shuffle(trainY, random_state=rand)
     testX = shuffle(testX)
 
+    trainX_knn = trainX.copy()
+    trainY_knn = trainY.copy()
+
     # construct validation set
     rand = np.random.randint(1000)
     trainX, validX = train_test_split(trainX, test_size=0.2, random_state=rand)
@@ -35,13 +38,19 @@ if __name__ == "__main__":
     prediction0 = randomGuess(testX[features])
     # k-nearest neighbors
     prediction1 = kNearestNeighbor(trainX[features], trainY, testX[features])
+    prediction1B = kNearestNeighborTuned(trainX_knn[features], trainY_knn, testX[features])
     # 3-layers neural network
     prediction2 = threeLayerNN(trainX[features], trainY, validX[features], validY, testX[features])
+    prediction2B = threeLayerNNTuned(trainX[features], trainY, validX[features], validY, testX[features])
     # deep neural network
     prediction3 = deepNN(trainX[features], trainY, validX[features], validY, testX[features])
+    prediction3B = deepNNTuned(trainX[features], trainY, validX[features], validY, testX[features])
 
     # construct output data frame and export to csv
     output(testX, prediction0, "randGuess")
     output(testX, prediction1, "kNearN")
-    output(testX, prediction2, "3layerNN")
-    output(testX, prediction3, "deepNN")
+    output(testX, prediction1B, "kNearNtuned")
+    # output(testX, prediction2, "3layerNN")
+    # output(testX, prediction2B, "3layerNNtuned")
+    # output(testX, prediction3, "deepNN")
+    output(testX, prediction3B, "deepNNtuned")
