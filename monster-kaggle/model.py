@@ -2,12 +2,18 @@
 import numpy as np
 import tensorflow as tf
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
 # internal libraries
 from parsing import *
 
 # Guess the data randomly
-def randomGuess(testX):
+def randomGuess(trainX, trainY, testX):
     # Given that Ghoul class is most dominant in training set
+    # find the accuray from the training set
+    yhat = np.tile(np.array([0,1,0]), (trainX.shape[0], 1))
+    accuracy = accuracy_score(y_true=trainY.to_numpy(), y_pred=yhat)
+    print("Random guess training set accuracy:", accuracy)
+    # construct the guess for the testing set
     guess = np.tile(np.array([0,1,0]), (testX.shape[0], 1))
     predictions = decodeOHE(guess)
     return predictions
@@ -29,8 +35,7 @@ def kNearestNeighbor(trainX, trainY, testX):
     return predictions
 
 # Train and test the data using 3-layers neural network
-# TODO: add validation on hyperparameters
-def threeLayerNN(trainX, trainY, validX, validY, testX):
+def threeLayerNN(trainX, trainY, testX):
     # hyperparameters
     EPOCH = 100
     BATCH_SIZE = 64
@@ -55,8 +60,7 @@ def threeLayerNN(trainX, trainY, validX, validY, testX):
     return predictions
 
 # Train and test the data using deep neural network
-# TODO: add validation on hyperparameters
-def deepNN(trainX, trainY, validX, validY, testX):
+def deepNN(trainX, trainY, testX):
     # hyperparameters
     EPOCH = 100
     BATCH_SIZE = 64

@@ -32,7 +32,7 @@ if __name__ == "__main__":
                 'green', 'white']
 
     # random guess
-    prediction0 = randomGuess(testX[features])
+    prediction0 = randomGuess(trainX[features], trainY, testX[features])
     # k-nearest neighbors
     prediction1 = kNearestNeighbor(trainX[features], trainY, testX[features])
     # 3-layers neural network
