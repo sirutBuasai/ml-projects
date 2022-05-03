@@ -25,5 +25,5 @@ def visualize():
                                                                  'has_soul']),
                       col='type')
     grid = grid.map(sns.boxplot, 'value', 'variable', palette='muted', order=None)
-    # show l=plot
+    # show plot
     plt.show()
