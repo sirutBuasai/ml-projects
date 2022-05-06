@@ -60,7 +60,6 @@ def optimizeKNN(trainX, trainY, testX):
     print("Accuracy on training for knn tuned:", knn.score(trainX, trainY))
     return predictions
 
-
 # Train and test the data using 3-layers neural network
 def threeLayerNN(trainX, trainY, testX):
     # hyperparameters
@@ -89,7 +88,7 @@ def threeLayerNN(trainX, trainY, testX):
 def optimize3NN(trainX, trainY, validX, validY, testX):
     EPOCHS = np.array([25, 50, 100])
     BATCH_SIZES = np.array([16, 32, 64, 128])
-    # NUM_HIDDENS = np.array([30, 40, 50])
+    NUM_HIDDENS = np.array([30, 40, 50])
     NUM_HIDDENS = np.array([80, 100, 120])
     LEARN_RATES = np.array([0.01, 0.001])
 
@@ -196,11 +195,8 @@ def deepNN(trainX, trainY, testX):
 def optimizeDNN(trainX, trainY, validX, validY, testX):
     EPOCHS = np.array([25, 50, 100])
     BATCH_SIZES = np.array([16, 32, 64, 128])
-    # NUM_HIDDENS1 = np.array([40, 50, 60])
     NUM_HIDDENS1 = np.array([80, 100, 120])
-    # NUM_HIDDENS2 = np.array([40, 50, 60])
     NUM_HIDDENS2 = np.array([80, 100, 120])
-    # NUM_HIDDENS3 = np.array([40, 50, 60])
     NUM_HIDDENS3 = np.array([80, 100, 120])
     LEARN_RATES = np.array([0.01, 0.001])
     ALPHA = 0.1
